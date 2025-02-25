@@ -9,13 +9,13 @@ $ cd CounterStrike2-Linux-Cheat/
 
 ### Installing dependencies
 Install the necessary packages.  
-
-TODO
-
-qt 6 or 5 idk
-gcc
-x11 libs
-more probably
+  
+TODO  
+  
+qt 6 or 5 idk  
+gcc  
+x11 libs  
+more probably  
 
 ### Compiling
 Build the program from source.  
