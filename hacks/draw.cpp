@@ -1,8 +1,8 @@
 #include "draw.hpp"
 
-#include "../xutil.hpp"
-
 #include "esp.hpp"
+
+#include "../xutil.hpp"
 
 void draw(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Window window) {
   GC gc;

@@ -5,6 +5,7 @@
 
 namespace Client {
   inline uintptr_t view_matrix;
+  inline uintptr_t view_angles;
 }
 
 #endif

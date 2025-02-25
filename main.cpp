@@ -3,14 +3,17 @@
 #include <thread>
 
 #include "hacks/player_info.hpp"
-#include "hacks/draw.cpp"
+#include "hacks/aimbot.hpp"
+#include "hacks/draw.hpp"
+
+#include "gui/gui.hpp"
 
 #include "process.hpp"
 #include "memory.hpp"
 #include "client.hpp"
 #include "xutil.hpp"
 
-int main(void) {
+int main(int argc, char *argv[]) {
   if (getuid()) { //check if root
     printf("Please run as root\n");
     return 1;
@@ -22,9 +25,7 @@ int main(void) {
     return 1;
   }
   
-  printf("Game pid: %d\n", game_pid);
-
-  
+  printf("Game pid: %d\n", game_pid);  
   
   /* X11 initiation */
   Display* display = XOpenDisplay(NULL);
@@ -50,7 +51,7 @@ int main(void) {
   XMatchVisualInfo(display, DefaultScreen(display), 32, TrueColor, &vinfo);
   Colormap colormap = XCreateColormap(display, DefaultRootWindow(display), vinfo.visual, AllocNone);
 
-  Xutil::Color bgcolor = Xutil::xcolor_from_rgba(0, 0, 0, 0, display, screen);
+  Xutil::Color bgcolor = Xutil::xcolor_from_rgba(0, 0, 0, 0, display);
   
 #define BASIC_EVENT_MASK (StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|LeaveWindowMask|KeyPressMask|KeyReleaseMask|KeymapStateMask)
 #define NOT_PROPAGATE_MASK (KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|ButtonMotionMask)
@@ -80,11 +81,19 @@ int main(void) {
   XFixesDestroyRegion(display, region);
 
   XdbeBackBuffer back_buffer = XdbeAllocateBackBufferName(display, window, 0);
-
-  XMapWindow(display, window);
   
-  XFontStruct* shadowfont = XLoadQueryFont(display, "6x13bold");
-  XFontStruct* font = XLoadQueryFont(display, "6x13");
+  XMapWindow(display, window);
+
+  Draw::black = Xutil::xcolor_from_rgb(0, 0, 0, display);
+  Draw::green = Xutil::xcolor_from_rgb(0, 255, 50, draw_display);
+  Draw::red = Xutil::xcolor_from_rgb(255, 0, 50, draw_display);
+  Draw::white = Xutil::xcolor_from_rgb(255, 255, 255, draw_display);
+  Draw::cyan = Xutil::xcolor_from_rgb(0, 255, 240, draw_display);
+  Draw::yellow = Xutil::xcolor_from_rgb(255, 255, 0, draw_display);
+  Draw::orange = Xutil::xcolor_from_rgb(255, 170, 0, draw_display); 
+  
+  Draw::shadowfont = XLoadQueryFont(display, "6x13bold");
+  Draw::font = XLoadQueryFont(display, "6x13");
   /* X11 initiation end */
 
   const uintptr_t client_address = Memory::module_base_address(game_pid, "libclient.so");
@@ -99,11 +108,22 @@ int main(void) {
   Memory::read(game_pid, resource_offset + 0x50, &PlayerInfo::entity_list, sizeof(uintptr_t));
 
   PlayerInfo::ptr_local_player = client_address + 0x39C03E0;
-  
-  std::thread draw_thread(draw, game_pid, back_buffer, draw_display, window);
-  pthread_setname_np(draw_thread.native_handle(), "drawThread");
+
+  printf("local player: %p\n", PlayerInfo::ptr_local_player);
 
   Client::view_matrix = client_address + 0x39C0C60;
+  Client::view_angles = client_address + 0x39CAE20;
+
+  printf("view_angles: %p\n", Client::view_angles);
+  
+  std::thread gui_thread(gui, argc, argv);
+  pthread_setname_np(gui_thread.native_handle(), "gui_thread");  
+  
+  std::thread draw_thread(draw, game_pid, back_buffer, draw_display, window);
+  pthread_setname_np(draw_thread.native_handle(), "draw_thread");
+
+  std::thread aim_thread(aimbot, game_pid, draw_display);
+  pthread_setname_np(aim_thread.native_handle(), "aim_thread");
   
   for (;;) {
     players(game_pid);
