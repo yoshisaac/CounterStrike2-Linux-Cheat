@@ -73,7 +73,7 @@ namespace Xutil {
   inline bool key_down(Display* d, int key) {
     char keys[32];
     XQueryKeymap(d, keys);
-
+    
     KeyCode keyCode = XKeysymToKeycode(d, key);
     return (keys[keyCode / 8] & (1 << (keyCode % 8))) != 0;
   }

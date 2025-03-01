@@ -8,6 +8,7 @@ struct Esp {
 
 struct Aim {
   bool master = false;
+  char key = 'x';
   bool recoil = true;
 };
 

@@ -2,15 +2,19 @@
 #include "config.hpp"
 
 #include <QApplication>
+#include <QKeySequence>
+#include <QKeySequenceEdit>
 #include <QWidget>
 #include <QTabWidget>
 #include <QSlider>
 #include <QLabel>
+#include <QDebug>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QCheckBox>
 #include <QLayout>
+#include <QKeyEvent>
 #include <grp.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -79,6 +83,13 @@ void gui(int argc, char* argv[]) {
     config.aim.master = !config.aim.master;
   });
 
+  QKeySequenceEdit* key = new QKeySequenceEdit;
+  key->setKeySequence(QKeySequence("x"));
+  aim_layout->addWidget(key);
+  QObject::connect(key, &QKeySequenceEdit::keySequenceChanged, [](const QKeySequence &keySequence) {
+    config.aim.key = keySequence.toString().toStdString()[0];
+  });
+  
   QCheckBox* aim_recoil = new QCheckBox("Recoil control", esp_tab);
   aim_recoil->setCheckState(Qt::CheckState::Checked);
   aim_layout->addWidget(aim_recoil);

@@ -36,8 +36,8 @@ void aimbot(pid_t game_pid, Display* aim_display) {
 
       float hyp = sqrt(delta_location[0] * delta_location[0] + delta_location[1] * delta_location[1]);
 
-      plocal_angles_final[0] = (float)(atan(delta_location[2] / hyp) * radpi);
-      plocal_angles_final[1] = (float)(atan(delta_location[1] / delta_location[0]) * radpi);
+      plocal_angles_final[0] = atan(delta_location[2] / hyp) * radpi;
+      plocal_angles_final[1] = atan(delta_location[1] / delta_location[0]) * radpi;
 
       float distance = distance_3d(plocal.location, player.bone_matrix[6]);
 
@@ -51,7 +51,7 @@ void aimbot(pid_t game_pid, Display* aim_display) {
 	  plocal_angles_final[1] += 180.0f;
 	}
 
-	if (fov > 90 && !Xutil::key_down(aim_display, XK_X)) {
+	if (fov > 90 && !Xutil::key_down(aim_display, config.aim.key)) {
 	  Aimbot::index = -1;
 	  continue;
 	}
@@ -76,7 +76,7 @@ void aimbot(pid_t game_pid, Display* aim_display) {
       }
 
 
-      if (Aimbot::index == i && Xutil::key_down(aim_display, XK_X)) {
+      if (Aimbot::index == i && Xutil::key_down(aim_display, config.aim.key)) {
         Memory::write(game_pid, Client::view_angles, &*plocal_angles_final, sizeof(float[2]));
       } else {
         if (fov <= 90 && fov < PlayerInfo::get_player(Aimbot::index).fov_distance) {
