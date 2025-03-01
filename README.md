@@ -9,13 +9,16 @@ $ cd CounterStrike2-Linux-Cheat/
 
 ### Installing dependencies
 Install the necessary packages.  
+
+Debian/Ubuntu:
+``` console
+$ sudo apt install mesa-common-dev libx11-dev libxfixes-dev libxcomposite-dev gcc g++ make qt6-base-dev
+```
   
-TODO  
-  
-qt 6 or 5 idk  
-gcc  
-x11 libs  
-more probably  
+Arch Linux:
+``` console
+$ sudo pacman -S base-devel xorg-fonts-misc qt6-base
+```
 
 ### Compiling
 Build the program from source.  
