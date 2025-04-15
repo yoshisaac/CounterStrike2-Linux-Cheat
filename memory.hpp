@@ -9,6 +9,11 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <iostream>
+
+#ifdef __AVX2__
+#include <immintrin.h>
+#endif
 
 #define ELF_PROGRAM_HEADER_OFFSET 0x20
 #define ELF_PROGRAM_HEADER_ENTRY_SIZE 0x36
@@ -48,10 +53,10 @@ namespace Memory {
     remote[0].iov_base = (void*)address;
     remote[0].iov_len = size;
 
-    // if (process_vm_readv(pid, local, 1, remote, 1, 0) == -1) {
-    //   std::cout << "Error read: " << errno << '\n';
-    //   std::cout << "Error read address: " << std::hex << address << '\n';
-    // }
+    if (process_vm_readv(pid, local, 1, remote, 1, 0) == -1) {
+      std::cout << "Error read: " << errno << '\n';
+      std::cout << "Error read address: " << std::hex << address << '\n';
+    }
 
     return (process_vm_readv(pid, local, 1, remote, 1, 0) == size);
   }
@@ -95,7 +100,7 @@ namespace Memory {
 
   static uintptr_t module_size(pid_t proc_pid, uintptr_t module_base_address) {
     uintptr_t section_header_offset = (uintptr_t)NULL;
-    Memory::read(proc_pid, module_base_address + ELF_SECTION_HEADER_OFFSET, &section_header_offset, sizeof(unsigned short));
+    Memory::read(proc_pid, module_base_address + ELF_SECTION_HEADER_OFFSET, &section_header_offset, sizeof(unsigned long));
     uintptr_t section_header_entry_size = (uintptr_t)NULL;
     Memory::read(proc_pid, module_base_address + ELF_SECTION_HEADER_ENTRY_SIZE, &section_header_entry_size, sizeof(unsigned short));
     uintptr_t section_header_num_entries = (uintptr_t)NULL;
@@ -106,16 +111,16 @@ namespace Memory {
   
   static std::vector<unsigned char> read_bytes(pid_t proc_pid, uintptr_t address, unsigned long count) {
     const auto path = "/proc/" + std::to_string(proc_pid) + "/mem";
-    int file = open(path.c_str(), O_RDONLY);
+    const int file = open(path.c_str(), O_RDONLY);
     std::vector<unsigned char> buffer(count);
-    pread(file, buffer.data(), count, address);
+    pread(file, buffer.data(), count, static_cast<long>(address));
     close(file);
     return buffer;
   }
 
   static std::vector<unsigned char> dump_module(pid_t proc_pid, uintptr_t module_address) {
     const uintptr_t module_size = Memory::module_size(proc_pid, module_address);
-
+    
     // should be 1 gb
     if (module_size == 0 || module_size > 1000000000) {
       printf("could not dump module at %lu\n", module_address);
@@ -126,12 +131,14 @@ namespace Memory {
   }
 
   static uintptr_t scan_pattern(pid_t proc_pid, std::vector<unsigned char> pattern, std::vector<bool> mask, uintptr_t length, uintptr_t module_address) {
-    const auto module = dump_module(proc_pid, module_address);
+    const std::vector<unsigned char> module = Memory::dump_module(proc_pid, module_address);
+    
     if (module.size() < 500) {
       return (uintptr_t)NULL;
     }
 
-    for (unsigned long i = 0; i < module.size() - length; i++) {
+    const unsigned long module_end = module.size();
+    for (unsigned long i = 0; i < module_end - length; i++) {
       bool found = true;
       for (unsigned long j = 0; j < length; j++) {
 	if (mask[j] && module[i + j] != pattern[j]) {
@@ -144,6 +151,7 @@ namespace Memory {
       }
     }
 
+    printf("Bad pattern\n");
     return (uintptr_t)NULL;
   }
 

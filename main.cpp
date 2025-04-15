@@ -107,11 +107,41 @@ int main(int argc, char *argv[]) {
 
   Memory::read(game_pid, resource_offset + 0x50, &PlayerInfo::entity_list, sizeof(uintptr_t));
 
-  PlayerInfo::ptr_local_player = client_address + 0x39C03E0;
+  PlayerInfo::ptr_local_player = Memory::scan_pattern(game_pid,
+						      {0x48, 0x83, 0x3D, 0x00,  0x00,  0x00,  0x00,  0x00, 0x0F, 0x95, 0xC0, 0xC3},
+						      {true, true, true, false, false, false, false, true, true, true, true, true}, 12,
+						      client_address);
+  if (!PlayerInfo::ptr_local_player) { printf("Couldn't find local player\n"); return 1; }
+  PlayerInfo::ptr_local_player = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
+  
 
   printf("local player: %p\n", PlayerInfo::ptr_local_player);
 
-  Client::view_matrix = client_address + 0x39C0C60;
+  Client::view_matrix = Memory::scan_pattern(game_pid,
+		       {0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8D, 0x0D},
+		       {
+			 true,
+			 true,
+			 true,
+			 false,
+			 false,
+			 false,
+			 false,
+			 true,
+			 true,
+			 true,
+			 false,
+			 false,
+			 false,
+			 false,
+			 true,
+			 true,
+			 true,
+		       },
+		       17, client_address);
+  if (!Client::view_matrix) { printf("Couldn't find view matrix\n"); return 1; }
+  Client::view_matrix = Memory::relative_address(game_pid, Client::view_matrix + 0x7, 0x3, 0x7);
+  
   Client::view_angles = client_address + 0x39CAE20;
 
   printf("view_angles: %p\n", Client::view_angles);
@@ -122,8 +152,8 @@ int main(int argc, char *argv[]) {
   std::thread draw_thread(draw, game_pid, back_buffer, draw_display, window);
   pthread_setname_np(draw_thread.native_handle(), "draw_thread");
 
-  std::thread aim_thread(aimbot, game_pid, draw_display);
-  pthread_setname_np(aim_thread.native_handle(), "aim_thread");
+  // std::thread aim_thread(aimbot, game_pid, draw_display);
+  // pthread_setname_np(aim_thread.native_handle(), "aim_thread");
   
   for (;;) {
     players(game_pid);

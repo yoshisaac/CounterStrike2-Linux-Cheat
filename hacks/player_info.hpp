@@ -67,7 +67,7 @@ namespace PlayerInfo {
     return l_players[index];
   }
 
-  inline int i_local_player = -1;
+  inline int i_local_player;
   inline uintptr_t ptr_local_player;
   
   static Player get_local_player(void) {

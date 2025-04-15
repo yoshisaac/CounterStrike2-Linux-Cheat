@@ -50,11 +50,23 @@ void players(pid_t game_pid) {
       continue;
     }
     
+    uintptr_t local_player_controller;
+    Memory::read(game_pid, PlayerInfo::ptr_local_player, &local_player_controller, sizeof(uintptr_t));
+
+    uintptr_t local_player_pawn;
+    Memory::read(game_pid, local_player_controller + 0x7B4, &local_player_pawn, sizeof(uintptr_t));
+
+    uintptr_t local_player_pawn2;
+    Memory::read(game_pid, (PlayerInfo::entity_list + 0x10) + 8 * ((local_player_pawn & 0x7FFF) >> 9), &local_player_pawn2, sizeof(uintptr_t));
+
     uintptr_t local_player;
-    Memory::read(game_pid, PlayerInfo::ptr_local_player, &local_player, sizeof(uintptr_t));
-
-    if (player == local_player) { PlayerInfo::i_local_player = i-1; }
-
+    Memory::read(game_pid, local_player_pawn2 + 120 * (local_player_pawn & 0x1FF), &local_player, sizeof(uintptr_t));
+    
+    if (player == local_player) {
+      PlayerInfo::i_local_player = i-1;
+      printf("%d\n", PlayerInfo::i_local_player);
+    }
+    
     uintptr_t bone_matrix_ptr;
     float bone_matrix[80][3];
     Memory::read(game_pid, game_scene + 0x170 + 0x80, &bone_matrix_ptr, sizeof(uintptr_t));
@@ -93,7 +105,7 @@ void players(pid_t game_pid) {
     
     float location[3];
     Memory::read(game_pid, player + 0xD40, &location, sizeof(float[3]));
-
+    
     unsigned long spotted_mask;
     Memory::read(game_pid, player + 0x328C, &spotted_mask, sizeof(unsigned long));
     bool spotted = spotted_mask & (1 << PlayerInfo::i_local_player);
