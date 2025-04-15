@@ -92,9 +92,9 @@ int main(int argc, char *argv[]) {
   Draw::yellow = Xutil::xcolor_from_rgb(255, 255, 0, draw_display);
   Draw::orange = Xutil::xcolor_from_rgb(255, 170, 0, draw_display); 
   
-  Draw::shadowfont = XLoadQueryFont(display, "6x13bold");
+  Draw::shadowfont = XLoadQueryFont(display, "fixed");
   if (!Draw::shadowfont) {
-    printf("Could not Query Font \"6x13bold\"\n");
+    printf("Could not Query Font \"fixed\"\n");
     return 1;
   }
   
