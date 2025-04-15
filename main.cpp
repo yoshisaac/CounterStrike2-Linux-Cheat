@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
   if (!Client::view_matrix) { printf("Couldn't find view matrix\n"); return 1; }
   Client::view_matrix = Memory::relative_address(game_pid, Client::view_matrix + 0x7, 0x3, 0x7);
   
-  Client::view_angles = client_address + 0x39CAE20;
+  Client::view_angles = client_address + 0x39915E0;
 
   printf("view_angles: %p\n", Client::view_angles);
   
@@ -161,8 +161,8 @@ int main(int argc, char *argv[]) {
   std::thread draw_thread(draw, game_pid, back_buffer, draw_display, window);
   pthread_setname_np(draw_thread.native_handle(), "draw_thread");
 
-  // std::thread aim_thread(aimbot, game_pid, draw_display);
-  // pthread_setname_np(aim_thread.native_handle(), "aim_thread");
+  std::thread aim_thread(aimbot, game_pid, draw_display);
+  pthread_setname_np(aim_thread.native_handle(), "aim_thread");
   
   for (;;) {
     players(game_pid);

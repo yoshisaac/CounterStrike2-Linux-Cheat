@@ -30,9 +30,9 @@ void aimbot(pid_t game_pid, Display* aim_display) {
       Memory::read(game_pid, Client::view_angles, &plocal_angles, sizeof(float[3]));
       float plocal_angles_final[3] = {*plocal_angles};
 
-      float delta_location[3] = { float(plocal.bone_matrix[29][0] - player.bone_matrix[6][0]),
-				  float(plocal.bone_matrix[29][1] - player.bone_matrix[6][1]),
-				  float(plocal.bone_matrix[29][2] + plocal.height - player.bone_matrix[6][2])};
+      float delta_location[3] = { float(plocal.location[0] - player.bone_matrix[6][0]),
+				  float(plocal.location[1] - player.bone_matrix[6][1]),
+				  float(plocal.location[2] + plocal.height - player.bone_matrix[6][2])};
 
       float hyp = sqrt(delta_location[0] * delta_location[0] + delta_location[1] * delta_location[1]);
 
