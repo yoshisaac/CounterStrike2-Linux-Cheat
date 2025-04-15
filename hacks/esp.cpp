@@ -28,7 +28,6 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     if (!world_to_screen(game_pid, player.bone_matrix[29], screen)) continue;
 
       
-     
     float distance = distance_3d(plocal.location, player.location);
 
     float y_offset_text[2];
@@ -96,6 +95,7 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       
       XDrawLine(draw_display, back_buffer, gc, 1920/2, 1080, screen[0], screen[1]);
     }
+
     /*
     XSetForeground(draw_display, gc, Draw::white);
     for (int i = 0; i < 50; ++i) {
@@ -105,6 +105,7 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       XDrawString(draw_display, back_buffer, gc, bone[0], bone[1], std::to_string(i).c_str(), strlen(std::to_string(i).c_str()));
     }
     */
+
     if (config.esp.skeleton) {
       XSetLineAttributes(draw_display, gc, 0, LineSolid, CapButt, JoinMiter);
       XSetForeground(draw_display, gc, Draw::white);

@@ -64,7 +64,6 @@ void players(pid_t game_pid) {
     
     if (player == local_player) {
       PlayerInfo::i_local_player = i-1;
-      printf("%d\n", PlayerInfo::i_local_player);
     }
     
     uintptr_t bone_matrix_ptr;

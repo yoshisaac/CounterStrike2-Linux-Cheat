@@ -93,7 +93,16 @@ int main(int argc, char *argv[]) {
   Draw::orange = Xutil::xcolor_from_rgb(255, 170, 0, draw_display); 
   
   Draw::shadowfont = XLoadQueryFont(display, "6x13bold");
+  if (!Draw::shadowfont) {
+    printf("Could not Query Font \"6x13bold\"\n");
+    return 1;
+  }
+  
   Draw::font = XLoadQueryFont(display, "6x13");
+  if (!Draw::font) {
+    printf("Could not Query Font \"6x13\"\n");
+    return 1;
+  }
   /* X11 initiation end */
 
   const uintptr_t client_address = Memory::module_base_address(game_pid, "libclient.so");
