@@ -21,6 +21,19 @@ void players(pid_t game_pid) {
       continue;
     }
 
+    uintptr_t name_address;
+    Memory::read(game_pid, controller + 0x8F8, &name_address, sizeof(uintptr_t));
+
+    std::string name;
+    for (int h = 0; h < 256; ++h) {
+      char c;
+      Memory::read(game_pid, name_address + h, &c, sizeof(char));\
+
+      if (c == '\0') break;
+
+      name += c;
+    }
+    
     uintptr_t pawn;
     Memory::read(game_pid, controller + 0x7B4, &pawn, sizeof(uintptr_t));
     if (!pawn) {
@@ -116,6 +129,6 @@ void players(pid_t game_pid) {
 						    crouched, spotted,
 						    fov_multiplier, height,
 						    aim_punch, location, bone_matrix,
-						    PlayerInfo::l_players[i-1].fov_distance);
+						    PlayerInfo::l_players[i-1].fov_distance, name);
   }
 }

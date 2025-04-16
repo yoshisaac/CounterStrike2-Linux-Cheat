@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include <cstdint>
-#include <stdio.h>
+#include <string>
 
 void players(pid_t game_pid);
 
@@ -19,7 +19,8 @@ namespace PlayerInfo {
     float aim_punch[2];
     float location[3];
     float bone_matrix[80][3];
-
+    std::string name;
+    
     float fov_distance;
     
     Player() {
@@ -32,12 +33,13 @@ namespace PlayerInfo {
       location[0] = 0;
       location[1] = 0;
       location[2] = 0;
+      name = "";
     }
 
     Player(int index, int health, int team,
 	   bool crouched, bool spotted, float fov_multiplier, float height,
 	   float aim_punch[2], float location[3], float bone_matrix[80][3],
-	   float fov_distance) {
+	   float fov_distance, std::string name) {
       this->index = index;
       this->health = health;
       this->team = team;
@@ -52,6 +54,8 @@ namespace PlayerInfo {
       this->location[1] = location[1];
       this->location[2] = location[2];
 
+      this->name = name;
+      
       for (int i = 0; i < 80; ++i) {
 	this->bone_matrix[i][0] = bone_matrix[i][0];
 	this->bone_matrix[i][1] = bone_matrix[i][1];

@@ -33,6 +33,10 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     location_z_offset[2] = location_z_offset[2] + 5;
     world_to_screen(game_pid, location_z_offset, y_offset_text);
 
+    float y_offset_down[2];
+    location_z_offset[2] = location_z_offset[2] - 6;
+    world_to_screen(game_pid, location_z_offset, y_offset_down);
+    
     float health_offset = (13000/distance) * (1.0/plocal.fov_multiplier);
     float box_offset = (12000/distance) * (1.0/plocal.fov_multiplier);
     
@@ -43,7 +47,7 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       XSetLineAttributes(draw_display, gc, 4, LineSolid, CapButt, JoinMiter);
 
       XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, y_offset[1]-2, screen[0] - health_offset - 5, screen[1]+2);
-      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset + 1, y_offset_text[1] + 1, std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29 + 1, y_offset_down[1] + 1, std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
     
       int ydelta = (y_offset[1] - screen[1]) * (1.f - (player.health / 100.f));
 	
@@ -66,9 +70,19 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
 
       XSetLineAttributes(draw_display, gc, 2, LineSolid, CapButt, JoinMiter);
       XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, screen[1], screen[0] - health_offset - 5, y_offset[1] - ydelta);          
-      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset, y_offset_text[1], std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29, y_offset_down[1], std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
     }      
 
+    if (config.esp.name) {
+      XSetForeground(draw_display, gc, Draw::black);
+      XSetFont(draw_display, gc, Draw::shadowfont->fid);
+      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2) + 1, y_offset[1] - 5 + 1, player.name.c_str(), strlen(player.name.c_str()));
+
+      XSetForeground(draw_display, gc, Draw::white);
+      XSetFont(draw_display, gc, Draw::font->fid);
+      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2), y_offset[1] - 5, player.name.c_str(), strlen(player.name.c_str()));
+    }    
+    
     //boxes
     if (config.esp.box) {
       XSetForeground(draw_display, gc, Draw::black);
@@ -80,7 +94,10 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       XDrawLine(draw_display, back_buffer, gc, screen[0] + box_offset + 1, y_offset[1], screen[0] - box_offset - 1, y_offset[1]); //top
       XDrawLine(draw_display, back_buffer, gc, screen[0] - box_offset - 1, screen[1], screen[0] + box_offset + 1, screen[1]); //bottom
       
-      XSetForeground(draw_display, gc, Draw::red);
+      XSetForeground(draw_display, gc, Xutil::xcolor_from_rgb(config.esp.box_color[0],
+							      config.esp.box_color[1],
+							      config.esp.box_color[2],
+							      draw_display));
 
       XSetLineAttributes(draw_display, gc, 2, LineSolid, CapRound, JoinRound);
 
@@ -110,7 +127,10 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
 
     if (config.esp.skeleton) {
       XSetLineAttributes(draw_display, gc, 0, LineSolid, CapButt, JoinMiter);
-      XSetForeground(draw_display, gc, Draw::white);
+      XSetForeground(draw_display, gc, Xutil::xcolor_from_rgb(config.esp.skeleton_color[0],
+							      config.esp.skeleton_color[1],
+							      config.esp.skeleton_color[2],
+							      draw_display));
       float bone[2];
       float bone2[2];
 
