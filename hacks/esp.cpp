@@ -19,13 +19,14 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     if (player.team == plocal.team) continue;
     if (player.index == -1) continue;
     if (player.health <= 0) continue;
-      
+    if (config.esp.spotted == true &&  player.spotted == false) continue;
+
     float y_offset[2];
     float location_z_offset[3] = {player.bone_matrix[29][0], player.bone_matrix[29][1], player.bone_matrix[29][2] + player.height + 9};
     world_to_screen(game_pid, location_z_offset, y_offset);
     
     float screen[2];
-    if (!world_to_screen(game_pid, player.bone_matrix[29], screen)) continue;
+    if (!world_to_screen(game_pid, player.bone_matrix[29], screen, true)) continue;
       
     float distance = distance_3d(plocal.location, player.location);
 
@@ -109,7 +110,10 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
 
     //snap lines
     if (config.esp.snap_lines) {
-      XSetForeground(draw_display, gc, Draw::green);
+      XSetForeground(draw_display, gc, Xutil::xcolor_from_rgb(config.esp.snap_lines_color[0],
+							      config.esp.snap_lines_color[1],
+							      config.esp.snap_lines_color[2],
+							      draw_display));
       XSetLineAttributes(draw_display, gc, 0, LineSolid, CapButt, JoinMiter);
       
       XDrawLine(draw_display, back_buffer, gc, 1920/2, 1080, screen[0], screen[1]);
@@ -135,61 +139,70 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       float bone2[2];
 
       //back + head
-      if (!world_to_screen(game_pid, player.bone_matrix[1], bone)) continue;
-      if (!world_to_screen(game_pid, player.bone_matrix[4], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[1], bone) && world_to_screen(game_pid, player.bone_matrix[4], bone2))
+	  XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
     
-      if (!world_to_screen(game_pid, player.bone_matrix[5], bone)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[5], bone) && world_to_screen(game_pid, player.bone_matrix[4], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
     
-      if (!world_to_screen(game_pid, player.bone_matrix[6], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
-
+      if (world_to_screen(game_pid, player.bone_matrix[5], bone) && world_to_screen(game_pid, player.bone_matrix[6], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      
       //left leg + foot
-      if (!world_to_screen(game_pid, player.bone_matrix[1], bone)) continue;
-      if (!world_to_screen(game_pid, player.bone_matrix[22], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[1], bone) && world_to_screen(game_pid, player.bone_matrix[22], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[23], bone)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[23], bone) && world_to_screen(game_pid, player.bone_matrix[22], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[24], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[23], bone) && world_to_screen(game_pid, player.bone_matrix[24], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
       //right leg + foot
-      if (!world_to_screen(game_pid, player.bone_matrix[1], bone)) continue;
-      if (!world_to_screen(game_pid, player.bone_matrix[25], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[1], bone) && world_to_screen(game_pid, player.bone_matrix[25], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[26], bone)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[26], bone) && world_to_screen(game_pid, player.bone_matrix[25], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[27], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[26], bone) && world_to_screen(game_pid, player.bone_matrix[27], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
       //left arm
-      if (!world_to_screen(game_pid, player.bone_matrix[5], bone)) continue;
-      if (!world_to_screen(game_pid, player.bone_matrix[8], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[5], bone) && world_to_screen(game_pid, player.bone_matrix[8], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[9], bone)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[9], bone) && world_to_screen(game_pid, player.bone_matrix[8], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[10], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[9], bone) && world_to_screen(game_pid, player.bone_matrix[10], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
       //right arm
-      if (!world_to_screen(game_pid, player.bone_matrix[5], bone)) continue;
-      if (!world_to_screen(game_pid, player.bone_matrix[13], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[5], bone) && world_to_screen(game_pid, player.bone_matrix[13], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[14], bone)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[14], bone) && world_to_screen(game_pid, player.bone_matrix[13], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
 
-      if (!world_to_screen(game_pid, player.bone_matrix[15], bone2)) continue;
-      XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
+      if (world_to_screen(game_pid, player.bone_matrix[14], bone) && world_to_screen(game_pid, player.bone_matrix[15], bone2))
+	XDrawLine(draw_display, back_buffer, gc, bone[0], bone[1], bone2[0], bone2[1]);
     }
 
+    if (config.esp.head_dot) {
+      float circle_size = (7500/distance);
+      float head[2];
+
+      XSetForeground(draw_display, gc, Xutil::xcolor_from_rgb(config.esp.head_dot_color[0],
+							      config.esp.head_dot_color[1],
+							      config.esp.head_dot_color[2],
+							      draw_display));
+      
+      if (world_to_screen(game_pid, player.bone_matrix[6], head))
+	XFillArc(draw_display, back_buffer, gc, head[0]-(circle_size/2), head[1]-(circle_size/2), circle_size, circle_size, 0, 360*65);
+      
+    }
+    
     //index
     // XSetFont(draw_display, gc, Draw::shadowfont->fid);
     // XSetForeground(draw_display, gc, Draw::black);

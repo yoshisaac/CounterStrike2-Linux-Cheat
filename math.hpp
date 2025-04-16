@@ -50,7 +50,7 @@ inline static bool world_to_screen(pid_t gamePid, const float vIn[3], float vOut
   vOut[1] = y * 100.f / 100.f;
 
   if (ignore_oof == true) {
-    if (vOut[0] > width+50 || vOut[1] > height+50 || vOut[0] < -50 || vOut[1] < -50) return false;
+    if (vOut[0] > width*2 || vOut[1] > height*2 || vOut[0] < -width || vOut[1] < -height) return false;
   }
   
   return true;

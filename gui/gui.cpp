@@ -48,6 +48,13 @@ void gui(int argc, char* argv[]) {
     config.esp.master = !config.esp.master;
   });
 
+  QCheckBox* esp_spotted = new QCheckBox("Spotted", esp_tab);
+  esp_spotted->setCheckState(Qt::CheckState::Unchecked);
+  esp_layout->addWidget(esp_spotted);
+  QObject::connect(esp_spotted, &QPushButton::clicked, []() {
+    config.esp.spotted = !config.esp.spotted;
+  });  
+  
   /* Box begin */
   QHBoxLayout* box_layout = new QHBoxLayout();
   QCheckBox* esp_box = new QCheckBox("Box", esp_tab);
@@ -137,13 +144,82 @@ void gui(int argc, char* argv[]) {
  
   esp_layout->addLayout(skeleton_layout);
   /* Skeleton end */
+
+  /* Head dot begin */
+  QHBoxLayout* head_dot_layout = new QHBoxLayout();
+  QCheckBox* esp_head_dot = new QCheckBox("Head dot", esp_tab);
+  esp_head_dot->setCheckState(Qt::CheckState::Unchecked);
+  head_dot_layout->addWidget(esp_head_dot);
+  QObject::connect(esp_head_dot, &QPushButton::clicked, []() {
+    config.esp.head_dot = !config.esp.head_dot;
+  });
+
+  QWidget head_dot_color_window;
+  head_dot_color_window.setWindowTitle("Select Head_Dot Color");
+  head_dot_color_window.setGeometry(100, 100, 520, 450);
+  head_dot_color_window.setFixedSize(520, 450);
+
+  QVBoxLayout* head_dot_color_dialog_layout = new QVBoxLayout(&head_dot_color_window);
+
+  QColorDialog* head_dot_color_dialog = new QColorDialog(QColor(255, 255, 255), esp_tab);
+  QPushButton* head_dot_color_button = new QPushButton();
+  head_dot_color_button->setAutoFillBackground(true);
+  head_dot_color_button->setPalette(QColor(255, 255, 255));
+  head_dot_color_button->update();
+  head_dot_color_dialog_layout->addWidget(head_dot_color_dialog);
+  head_dot_color_dialog->setWindowFlags(Qt::Widget);
+  head_dot_color_dialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+  head_dot_layout->addWidget(head_dot_color_button);
+  QObject::connect(head_dot_color_button, &QPushButton::clicked, [&]() {
+    head_dot_color_window.show();
+  });
+
+  QObject::connect(head_dot_color_dialog, &QColorDialog::currentColorChanged, [&](const QColor &color) {
+    color.getRgb(&config.esp.head_dot_color[0], &config.esp.head_dot_color[1], &config.esp.head_dot_color[2]);
+    head_dot_color_button->setPalette(color);
+    head_dot_color_button->update();
+  });
+ 
+  esp_layout->addLayout(head_dot_layout);  
+  /* Head dot end */
   
+  /* Snap lines begin */
+  QHBoxLayout* snap_lines_layout = new QHBoxLayout();
   QCheckBox* snap_lines = new QCheckBox("Snap lines", esp_tab);
   snap_lines->setCheckState(Qt::CheckState::Unchecked);
-  esp_layout->addWidget(snap_lines);
+  snap_lines_layout->addWidget(snap_lines);
   QObject::connect(snap_lines, &QPushButton::clicked, []() {
     config.esp.snap_lines = !config.esp.snap_lines;
   });
+
+    QWidget snap_lines_color_window;
+  snap_lines_color_window.setWindowTitle("Select Snap Lines Color");
+  snap_lines_color_window.setGeometry(100, 100, 520, 450);
+  snap_lines_color_window.setFixedSize(520, 450);
+  
+  QVBoxLayout* snap_lines_color_dialog_layout = new QVBoxLayout(&snap_lines_color_window);
+
+  QColorDialog* snap_lines_color_dialog = new QColorDialog(QColor(0, 255, 0), esp_tab);
+  QPushButton* snap_lines_color_button = new QPushButton();
+  snap_lines_color_button->setAutoFillBackground(true);
+  snap_lines_color_button->setPalette(QColor(0, 255, 0));
+  snap_lines_color_button->update();
+  snap_lines_color_dialog_layout->addWidget(snap_lines_color_dialog);
+  snap_lines_color_dialog->setWindowFlags(Qt::Widget);
+  snap_lines_color_dialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+  snap_lines_layout->addWidget(snap_lines_color_button);
+  QObject::connect(snap_lines_color_button, &QPushButton::clicked, [&]() {
+    snap_lines_color_window.show();
+  });
+
+  QObject::connect(snap_lines_color_dialog, &QColorDialog::currentColorChanged, [&](const QColor &color) {
+    color.getRgb(&config.esp.snap_lines_color[0], &config.esp.snap_lines_color[1], &config.esp.snap_lines_color[2]);
+    snap_lines_color_button->setPalette(color);
+    snap_lines_color_button->update();
+  });
+ 
+  esp_layout->addLayout(snap_lines_layout);
+  /* Snap lines end */
 
   tabs->addTab(esp_tab, "ESP");
   /* ESP end */
