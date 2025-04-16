@@ -8,13 +8,18 @@ struct Esp {
 
 struct Aim {
   bool master = false;
-  char key = 'x';
+  char key = 'c';
   bool recoil = true;
+};
+
+struct Misc {
+  bool spin;
 };
 
 struct Config {
   Esp esp;
   Aim aim;
+  Misc misc;
 };
 
 inline Config config;

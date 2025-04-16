@@ -14,6 +14,7 @@ namespace PlayerInfo {
     int team;
     bool crouched;
     bool spotted;
+    float fov_multiplier;
     float height;
     float aim_punch[2];
     float location[3];
@@ -34,7 +35,7 @@ namespace PlayerInfo {
     }
 
     Player(int index, int health, int team,
-	   bool crouched, bool spotted, float height,
+	   bool crouched, bool spotted, float fov_multiplier, float height,
 	   float aim_punch[2], float location[3], float bone_matrix[80][3],
 	   float fov_distance) {
       this->index = index;
@@ -42,6 +43,7 @@ namespace PlayerInfo {
       this->team = team;
       this->crouched = crouched;
       this->spotted = spotted;
+      this->fov_multiplier = fov_multiplier;
       this->height = height;
       this->aim_punch[0] = aim_punch[0];
       this->aim_punch[1] = aim_punch[1];

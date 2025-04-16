@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "hacks/player_info.hpp"
-#include "hacks/aimbot.hpp"
+#include "hacks/create_move.hpp"
 #include "hacks/draw.hpp"
 
 #include "gui/gui.hpp"
@@ -32,6 +32,8 @@ int main(int argc, char *argv[]) {
   if (!display) return 1;
 
   Display* draw_display = XOpenDisplay(NULL);
+
+  Display* move_display = XOpenDisplay(NULL);
   
   int screen = DefaultScreen(display);
 
@@ -154,16 +156,16 @@ int main(int argc, char *argv[]) {
   Client::view_angles = client_address + 0x39915E0;
 
   printf("view_angles: %p\n", Client::view_angles);
-  
+
   std::thread gui_thread(gui, argc, argv);
-  pthread_setname_np(gui_thread.native_handle(), "gui_thread");  
+  pthread_setname_np(gui_thread.native_handle(), "gui_thread");
   
   std::thread draw_thread(draw, game_pid, back_buffer, draw_display, window);
   pthread_setname_np(draw_thread.native_handle(), "draw_thread");
 
-  std::thread aim_thread(aimbot, game_pid, draw_display);
-  pthread_setname_np(aim_thread.native_handle(), "aim_thread");
-  
+  std::thread move_thread(create_move, game_pid, move_display);
+  pthread_setname_np(move_thread.native_handle(), "move_thread");
+
   for (;;) {
     players(game_pid);
     usleep(1000*1000/250);

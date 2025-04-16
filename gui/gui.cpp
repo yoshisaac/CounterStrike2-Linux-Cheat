@@ -84,7 +84,7 @@ void gui(int argc, char* argv[]) {
   });
 
   QKeySequenceEdit* key = new QKeySequenceEdit;
-  key->setKeySequence(QKeySequence("x"));
+  key->setKeySequence(QKeySequence("c"));
   aim_layout->addWidget(key);
   QObject::connect(key, &QKeySequenceEdit::keySequenceChanged, [](const QKeySequence &keySequence) {
     config.aim.key = keySequence.toString().toStdString()[0];
@@ -99,9 +99,23 @@ void gui(int argc, char* argv[]) {
   
   tabs->addTab(aim_tab, "AIMBOT");
   
+  QWidget* misc_tab = new QWidget;
+  
+  QVBoxLayout* misc_layout = new QVBoxLayout(misc_tab);
+  
+  QCheckBox* spin = new QCheckBox("Spin", misc_tab);
+  spin->setCheckState(Qt::CheckState::Unchecked);
+  misc_layout->addWidget(spin);
+  QObject::connect(spin, &QPushButton::clicked, []() {
+    config.misc.spin = !config.misc.spin;
+  });
+  
+  tabs->addTab(misc_tab, "MISC");
+  
+  
   window.show();
-
+  
   app.exec();
-
+  
   return;  
 }

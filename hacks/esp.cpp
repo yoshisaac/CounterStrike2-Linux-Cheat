@@ -26,7 +26,6 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     
     float screen[2];
     if (!world_to_screen(game_pid, player.bone_matrix[29], screen)) continue;
-
       
     float distance = distance_3d(plocal.location, player.location);
 
@@ -34,14 +33,17 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     location_z_offset[2] = location_z_offset[2] + 5;
     world_to_screen(game_pid, location_z_offset, y_offset_text);
 
+    float health_offset = (13000/distance) * (1.0/plocal.fov_multiplier);
+    float box_offset = (12000/distance) * (1.0/plocal.fov_multiplier);
+    
     if (config.esp.health) {
       //health bar shadow
       XSetForeground(draw_display, gc, Draw::black);
       XSetFont(draw_display, gc, Draw::shadowfont->fid);
       XSetLineAttributes(draw_display, gc, 4, LineSolid, CapButt, JoinMiter);
 
-      XDrawLine(draw_display, back_buffer, gc, screen[0] - (13000/distance) - 5, y_offset[1]-2, screen[0] - (13000/distance) - 5, screen[1]+2);
-      XDrawString(draw_display, back_buffer, gc, screen[0] - (13000/distance) + 1, y_offset_text[1] + 1, std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+      XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, y_offset[1]-2, screen[0] - health_offset - 5, screen[1]+2);
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset + 1, y_offset_text[1] + 1, std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
     
       int ydelta = (y_offset[1] - screen[1]) * (1.f - (player.health / 100.f));
 	
@@ -63,8 +65,8 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
 
 
       XSetLineAttributes(draw_display, gc, 2, LineSolid, CapButt, JoinMiter);
-      XDrawLine(draw_display, back_buffer, gc, screen[0] - (13000/distance) - 5, screen[1], screen[0] - (13000/distance) - 5, y_offset[1] - ydelta);          
-      XDrawString(draw_display, back_buffer, gc, screen[0] - (13000/distance), y_offset_text[1], std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+      XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, screen[1], screen[0] - health_offset - 5, y_offset[1] - ydelta);          
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset, y_offset_text[1], std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
     }      
 
     //boxes
@@ -73,19 +75,19 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       
       XSetLineAttributes(draw_display, gc, 4, LineSolid, CapButt, JoinMiter);
 
-      XDrawLine(draw_display, back_buffer, gc, (screen[0] - (12000/distance)), y_offset[1] - 1, (screen[0] - (12000/distance)), screen[1] + 1); //left
-      XDrawLine(draw_display, back_buffer, gc, (screen[0] + (12000/distance)), y_offset[1] - 1, (screen[0] + (12000/distance)), screen[1] + 1); //right
-      XDrawLine(draw_display, back_buffer, gc, screen[0] + (12000/distance) + 1, y_offset[1], screen[0] - (12000/distance) - 1, y_offset[1]); //top
-      XDrawLine(draw_display, back_buffer, gc, screen[0] - (12000/distance) - 1, screen[1], screen[0] + (12000/distance) + 1, screen[1]); //bottom
+      XDrawLine(draw_display, back_buffer, gc, (screen[0] - box_offset), y_offset[1] - 1, (screen[0] - box_offset), screen[1] + 1); //left
+      XDrawLine(draw_display, back_buffer, gc, (screen[0] + box_offset), y_offset[1] - 1, (screen[0] + box_offset), screen[1] + 1); //right
+      XDrawLine(draw_display, back_buffer, gc, screen[0] + box_offset + 1, y_offset[1], screen[0] - box_offset - 1, y_offset[1]); //top
+      XDrawLine(draw_display, back_buffer, gc, screen[0] - box_offset - 1, screen[1], screen[0] + box_offset + 1, screen[1]); //bottom
       
       XSetForeground(draw_display, gc, Draw::red);
 
       XSetLineAttributes(draw_display, gc, 2, LineSolid, CapRound, JoinRound);
 
-      XDrawLine(draw_display, back_buffer, gc, (screen[0] - (12000/distance)), y_offset[1], (screen[0] - (12000/distance)), screen[1]);
-      XDrawLine(draw_display, back_buffer, gc, (screen[0] + (12000/distance)), y_offset[1], (screen[0] + (12000/distance)), screen[1]);
-      XDrawLine(draw_display, back_buffer, gc, screen[0] + (12000/distance), y_offset[1], screen[0] - (12000/distance) - 1, y_offset[1]);
-      XDrawLine(draw_display, back_buffer, gc, screen[0] - (12000/distance), screen[1], screen[0] + (12000/distance), screen[1]);
+      XDrawLine(draw_display, back_buffer, gc, (screen[0] - box_offset), y_offset[1], (screen[0] - box_offset), screen[1]);
+      XDrawLine(draw_display, back_buffer, gc, (screen[0] + box_offset), y_offset[1], (screen[0] + box_offset), screen[1]);
+      XDrawLine(draw_display, back_buffer, gc, screen[0] + box_offset, y_offset[1], screen[0] - box_offset - 1, y_offset[1]);
+      XDrawLine(draw_display, back_buffer, gc, screen[0] - box_offset, screen[1], screen[0] + box_offset, screen[1]);
     }
 
     //snap lines

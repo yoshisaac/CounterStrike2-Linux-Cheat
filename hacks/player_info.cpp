@@ -65,6 +65,9 @@ void players(pid_t game_pid) {
     if (player == local_player) {
       PlayerInfo::i_local_player = i-1;
     }
+
+    float fov_multiplier;
+    Memory::read(game_pid, local_player + 0x12c4, &fov_multiplier, sizeof(float));
     
     uintptr_t bone_matrix_ptr;
     float bone_matrix[80][3];
@@ -111,7 +114,7 @@ void players(pid_t game_pid) {
     
     PlayerInfo::l_players[i-1] = PlayerInfo::Player(i-1, health, team,
 						    crouched, spotted,
-						    height,
+						    fov_multiplier, height,
 						    aim_punch, location, bone_matrix,
 						    PlayerInfo::l_players[i-1].fov_distance);
   }
