@@ -11,10 +11,6 @@
 #include <string>
 #include <iostream>
 
-#ifdef __AVX2__
-#include <immintrin.h>
-#endif
-
 #define ELF_PROGRAM_HEADER_OFFSET 0x20
 #define ELF_PROGRAM_HEADER_ENTRY_SIZE 0x36
 #define ELF_PROGRAM_HEADER_NUM_ENTRIES 0x38
@@ -98,6 +94,10 @@ namespace Memory {
     
   }
 
+  /* https://github.com/avitran0/deadlocked/blob/main/src/process.cpp
+   * Lots of functions are taken from this source file. They've all been modified to fit my cheat's
+   * framework/sdk. Very useful project.
+   */
   static uintptr_t module_size(pid_t proc_pid, uintptr_t module_base_address) {
     uintptr_t section_header_offset = (uintptr_t)NULL;
     Memory::read(proc_pid, module_base_address + ELF_SECTION_HEADER_OFFSET, &section_header_offset, sizeof(unsigned long));
