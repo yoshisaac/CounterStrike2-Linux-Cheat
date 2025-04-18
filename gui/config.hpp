@@ -1,13 +1,16 @@
 struct Esp {
   bool master = true;
 
+  bool ignore_team = true;
+  
   bool spotted = false;
 
   bool box = true;
   int box_color[3] = {255, 0, 50};
   
-  bool health = true;
-
+  bool health_bar = true;
+  bool health_text = false;
+  
   bool name = true;
 
   bool skeleton = false;
@@ -20,20 +23,34 @@ struct Esp {
   int snap_lines_color[3] = {0, 255, 50};
 };
 
-struct Aim {
-  bool master = false;
-  char key = 'c';
-  bool recoil = true;
+struct Visuals {
+  bool crosshair = false;
+  int crosshair_color[3] = {0, 255, 50};
+
+  bool visualize_recoil = true;
+  bool sniper_only = true;
 };
 
-struct Misc {
-  bool spin;
+struct Aim {
+  bool master = false;
+
+  bool ignore_team = true;
+  bool spotted = false;
+
+  float fov = 90;
+  bool show_fov = false;
+
+  char key = 'c';
+
+  bool recoil = true;
+
+  bool auto_shoot = false;
 };
 
 struct Config {
   Esp esp;
+  Visuals visuals;
   Aim aim;
-  Misc misc;
 };
 
 inline Config config;

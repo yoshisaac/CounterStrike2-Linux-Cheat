@@ -49,15 +49,15 @@ namespace Xutil {
     return focusedWindow;
   }
 
-  inline pid_t window_to_pid(Display *display, Window window) {
-    Atom prop = XInternAtom(display, "_NET_WM_PID", False);
+  inline pid_t window_to_pid(Display* d, Window window) {
+    Atom prop = XInternAtom(d, "_NET_WM_PID", False);
 
     Atom actualType;
     int format;
     unsigned long nItems, bytesAfter;
     unsigned char *propData = NULL;
 
-    if (XGetWindowProperty(display, window, prop, 0, LONG_MAX / 4, False, AnyPropertyType,
+    if (XGetWindowProperty(d, window, prop, 0, LONG_MAX / 4, False, AnyPropertyType,
 			   &actualType, &format, &nItems, &bytesAfter, &propData) == Success) {
       if (propData != NULL) {
 	pid_t *pidArray = reinterpret_cast<pid_t *>(propData);
@@ -68,6 +68,10 @@ namespace Xutil {
     }
 
     return -1; // Unable to retrieve PID
+  }
+
+  inline pid_t focused_window_to_pid(Display* d) {
+    return Xutil::window_to_pid(d, Xutil::focused_window(d));
   }
   
   inline bool key_down(Display* d, int key) {

@@ -76,11 +76,15 @@ void players(pid_t game_pid) {
     Memory::read(game_pid, local_player_pawn2 + 120 * (local_player_pawn & 0x1FF), &local_player, sizeof(uintptr_t));
     
     if (player == local_player) {
+      //printf("%p\n", local_player);
       PlayerInfo::i_local_player = i-1;
     }
 
     float fov_multiplier;
-    Memory::read(game_pid, local_player + 0x12c4, &fov_multiplier, sizeof(float));
+    Memory::read(game_pid, player + 0x12C4, &fov_multiplier, sizeof(float));
+
+    float fov_desired;
+    Memory::read(game_pid, player + 0x87C, &fov_desired, sizeof(float));
     
     uintptr_t bone_matrix_ptr;
     float bone_matrix[80][3];
@@ -97,9 +101,7 @@ void players(pid_t game_pid) {
 
     float aim_punch[2];
     Memory::read(game_pid, aim_punch_data_address + (aim_punch_length -1) * 12, &aim_punch, sizeof(float[2]));
-    aim_punch[0] *= 2;
-    aim_punch[1] *= 2;
-    
+
     if (aim_punch_length < 1) {
       aim_punch[0] = 0;
       aim_punch[1] = 0;
@@ -124,11 +126,31 @@ void players(pid_t game_pid) {
     unsigned long spotted_mask;
     Memory::read(game_pid, player + 0x328C, &spotted_mask, sizeof(unsigned long));
     bool spotted = spotted_mask & (1 << PlayerInfo::i_local_player);
+
+    uintptr_t weapon_entity_instance;
+    Memory::read(game_pid, player + 0x1348, &weapon_entity_instance, sizeof(uintptr_t));
+    uintptr_t weapon_entity_identity;
+    Memory::read(game_pid, weapon_entity_instance + 0x10, &weapon_entity_identity, sizeof(uintptr_t));
+    uintptr_t weapon_name_address;
+    Memory::read(game_pid, weapon_entity_identity + 0x20, &weapon_name_address, sizeof(uintptr_t));
+
+    std::string weapon_name;
+    for (int h = 0; h < 256; ++h) {
+      char c;
+      Memory::read(game_pid, weapon_name_address + h, &c, sizeof(char));
+
+      if (c == '\0') break;
+
+      weapon_name += c;
+    }
+        
     
     PlayerInfo::l_players[i-1] = PlayerInfo::Player(i-1, health, team,
 						    crouched, spotted,
-						    fov_multiplier, height,
+						    fov_multiplier, fov_desired,
+						    height,
 						    aim_punch, location, bone_matrix,
-						    PlayerInfo::l_players[i-1].fov_distance, name);
+						    PlayerInfo::l_players[i-1].fov_distance,
+						    name, weapon_name);
   }
 }

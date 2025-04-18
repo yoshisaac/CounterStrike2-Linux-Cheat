@@ -1,6 +1,7 @@
 #include "draw.hpp"
 
 #include "esp.hpp"
+#include "crosshair.hpp"
 
 #include "../xutil.hpp"
 
@@ -15,6 +16,7 @@ void draw(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Win
     
     //write to buffer
     esp(game_pid, back_buffer, draw_display, window, gc);
+    crosshair(game_pid, back_buffer, draw_display, window, gc);
     
     //swap buffers
     XdbeSwapInfo swap_info;

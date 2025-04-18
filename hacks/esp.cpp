@@ -8,7 +8,7 @@
 #include "../math.hpp"
 
 void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Window window, GC gc) {
-  if (Xutil::window_to_pid(draw_display, Xutil::focused_window(draw_display)) != game_pid) return;
+  if (Xutil::focused_window_to_pid(draw_display) != game_pid) return;
   if (!config.esp.master) return;
   
   for (unsigned long i = 0; i < 64; ++i) {
@@ -16,10 +16,10 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     PlayerInfo::Player plocal = PlayerInfo::get_local_player();
 
     if (player.index == plocal.index) continue;
-    if (player.team == plocal.team) continue;
+    if (config.esp.ignore_team == true && player.team == plocal.team) continue;
+    if (config.esp.spotted == true && player.spotted == false) continue;
     if (player.index == -1) continue;
     if (player.health <= 0) continue;
-    if (config.esp.spotted == true &&  player.spotted == false) continue;
 
     float y_offset[2];
     float location_z_offset[3] = {player.bone_matrix[29][0], player.bone_matrix[29][1], player.bone_matrix[29][2] + player.height + 9};
@@ -41,14 +41,13 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     float health_offset = (13000/distance) * (1.0/plocal.fov_multiplier);
     float box_offset = (12000/distance) * (1.0/plocal.fov_multiplier);
     
-    if (config.esp.health) {
+    if (config.esp.health_bar) {
       //health bar shadow
       XSetForeground(draw_display, gc, Draw::black);
-      XSetFont(draw_display, gc, Draw::shadowfont->fid);
       XSetLineAttributes(draw_display, gc, 4, LineSolid, CapButt, JoinMiter);
 
       XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, y_offset[1]-2, screen[0] - health_offset - 5, screen[1]+2);
-      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29 + 1, y_offset_down[1] + 1, std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+
     
       int ydelta = (y_offset[1] - screen[1]) * (1.f - (player.health / 100.f));
 	
@@ -66,22 +65,51 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
       else if (player.health <= 35)
 	XSetForeground(draw_display, gc, Draw::red);
 
-      XSetFont(draw_display, gc, Draw::font->fid);
 
 
       XSetLineAttributes(draw_display, gc, 2, LineSolid, CapButt, JoinMiter);
       XDrawLine(draw_display, back_buffer, gc, screen[0] - health_offset - 5, screen[1], screen[0] - health_offset - 5, y_offset[1] - ydelta);          
-      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29, y_offset_down[1], std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
     }      
 
+    if (config.esp.health_text) {
+      XSetForeground(draw_display, gc, Draw::black);
+      XSetFont(draw_display, gc, Draw::shadowfont->fid);
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29 + 1, y_offset_down[1] + 1,
+		  std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+      
+      int ydelta = (y_offset[1] - screen[1]) * (1.f - (player.health / 100.f));
+	
+      //health bar color
+      if (player.health > 100) { //show that they have more health than what is conventional
+	XSetForeground(draw_display, gc, Draw::cyan);
+	ydelta = 0;
+      }
+      else if (player.health <= 100 && player.health >= 90)
+	XSetForeground(draw_display, gc, Draw::green);
+      else if (player.health < 90 && player.health > 60)
+	XSetForeground(draw_display, gc, Draw::yellow);
+      else if (player.health <= 60 && player.health > 35)
+	XSetForeground(draw_display, gc, Draw::orange);
+      else if (player.health <= 35)
+	XSetForeground(draw_display, gc, Draw::red);
+
+      
+      XSetFont(draw_display, gc, Draw::font->fid);
+      XDrawString(draw_display, back_buffer, gc, screen[0] - health_offset - 29, y_offset_down[1],
+		  std::to_string(player.health).c_str(), strlen(std::to_string(player.health).c_str()));
+
+    }
+    
     if (config.esp.name) {
       XSetForeground(draw_display, gc, Draw::black);
       XSetFont(draw_display, gc, Draw::shadowfont->fid);
-      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2) + 1, y_offset[1] - 5 + 1, player.name.c_str(), strlen(player.name.c_str()));
+      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2) + 1, y_offset[1] - 5 + 1,
+		  player.name.c_str(), strlen(player.name.c_str()));
 
       XSetForeground(draw_display, gc, Draw::white);
       XSetFont(draw_display, gc, Draw::font->fid);
-      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2), y_offset[1] - 5, player.name.c_str(), strlen(player.name.c_str()));
+      XDrawString(draw_display, back_buffer, gc, screen[0] - (strlen(player.name.c_str())*6/2), y_offset[1] - 5,
+		  player.name.c_str(), strlen(player.name.c_str()));
     }    
     
     //boxes
@@ -190,7 +218,7 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
     }
 
     if (config.esp.head_dot) {
-      float circle_size = (7500/distance);
+      float circle_size = (7500/distance) * (1.0/plocal.fov_multiplier);
       float head[2];
 
       XSetForeground(draw_display, gc, Xutil::xcolor_from_rgb(config.esp.head_dot_color[0],
@@ -199,7 +227,7 @@ void esp(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display, Wind
 							      draw_display));
       
       if (world_to_screen(game_pid, player.bone_matrix[6], head))
-	XFillArc(draw_display, back_buffer, gc, head[0]-(circle_size/2), head[1]-(circle_size/2), circle_size, circle_size, 0, 360*65);
+	XFillArc(draw_display, back_buffer, gc, head[0]-(circle_size/2), head[1]-(circle_size/2), circle_size, circle_size, 0, 360*652);
       
     }
     

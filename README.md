@@ -38,10 +38,16 @@ sudo ./cs2-hack
 - ESP
   * Box
   * Health
+  * Name
   * Skeleton
+  * Head dot
   * Snap lines
 - Aimbot
+  * FOV
   * Recoil control
+  * Auto shoot
   
-![Screenshot of ESP](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/kmkgbpz6gt875y500w.png)
-![Screenshot of menu](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/bpw9bpcfmhq6wvh36s.png)
+![Screenshot of esp full](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/pwzzz2389xumgihzdq.png)
+![Screenshot of esp idea](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/v34j7li6ubtksm38v1.png)
+![Screenshot of menu esp](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/qqa9fgam1sghti7n1t.png)
+![Screenshot of menu aimbot](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/cpsd77sm6jthwqwg2n.png)

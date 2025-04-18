@@ -47,7 +47,14 @@ void gui(int argc, char* argv[]) {
   QObject::connect(esp_master, &QPushButton::clicked, []() {
     config.esp.master = !config.esp.master;
   });
-
+  
+  QCheckBox* esp_ignore_team = new QCheckBox("Ignore team", esp_tab);
+  esp_ignore_team->setCheckState(Qt::CheckState::Checked);
+  esp_layout->addWidget(esp_ignore_team);
+  QObject::connect(esp_ignore_team, &QPushButton::clicked, []() {
+    config.esp.ignore_team = !config.esp.ignore_team;
+  });  
+  
   QCheckBox* esp_spotted = new QCheckBox("Spotted", esp_tab);
   esp_spotted->setCheckState(Qt::CheckState::Unchecked);
   esp_layout->addWidget(esp_spotted);
@@ -93,13 +100,25 @@ void gui(int argc, char* argv[]) {
   esp_layout->addLayout(box_layout);
   /* Box end */
 
-  QCheckBox* esp_health = new QCheckBox("Health", esp_tab);
-  esp_health->setCheckState(Qt::CheckState::Checked);
-  esp_layout->addWidget(esp_health);
-  QObject::connect(esp_health, &QPushButton::clicked, []() {
-    config.esp.health = !config.esp.health;
+  /* Health begin */
+  QHBoxLayout* health_layout = new QHBoxLayout();
+  QCheckBox* esp_health_bar = new QCheckBox("Health bar", esp_tab);
+  esp_health_bar->setCheckState(Qt::CheckState::Checked);
+  health_layout->addWidget(esp_health_bar);
+  QObject::connect(esp_health_bar, &QPushButton::clicked, []() {
+    config.esp.health_bar = !config.esp.health_bar;
+  });
+  
+  QCheckBox* esp_health_text = new QCheckBox("Health text", esp_tab);
+  esp_health_text->setCheckState(Qt::CheckState::Unchecked);
+  health_layout->addWidget(esp_health_text);
+  QObject::connect(esp_health_text, &QPushButton::clicked, []() {
+    config.esp.health_text = !config.esp.health_text;
   });
 
+  esp_layout->addLayout(health_layout);
+  /* Health end */
+  
   QCheckBox* esp_name = new QCheckBox("Name", esp_tab);
   esp_name->setCheckState(Qt::CheckState::Checked);
   esp_layout->addWidget(esp_name);
@@ -192,7 +211,7 @@ void gui(int argc, char* argv[]) {
     config.esp.snap_lines = !config.esp.snap_lines;
   });
 
-    QWidget snap_lines_color_window;
+  QWidget snap_lines_color_window;
   snap_lines_color_window.setWindowTitle("Select Snap Lines Color");
   snap_lines_color_window.setGeometry(100, 100, 520, 450);
   snap_lines_color_window.setFixedSize(520, 450);
@@ -223,18 +242,122 @@ void gui(int argc, char* argv[]) {
 
   tabs->addTab(esp_tab, "ESP");
   /* ESP end */
+
+  /* Visuals begin */
+  QWidget* visuals_tab = new QWidget;
+
+  QVBoxLayout* visuals_layout = new QVBoxLayout(visuals_tab);
+
+  /* Crosshair begin */
+  QHBoxLayout* crosshair_layout = new QHBoxLayout();
+  QCheckBox* crosshair = new QCheckBox("Crosshair", visuals_tab);
+  crosshair->setCheckState(Qt::CheckState::Unchecked);
+  crosshair_layout->addWidget(crosshair);
+  QObject::connect(crosshair, &QPushButton::clicked, []() {
+    config.visuals.crosshair = !config.visuals.crosshair;
+  });
   
+  QWidget crosshair_color_window;
+  crosshair_color_window.setWindowTitle("Select Snap Lines Color");
+  crosshair_color_window.setGeometry(100, 100, 520, 450);
+  crosshair_color_window.setFixedSize(520, 450);
+  
+  QVBoxLayout* crosshair_color_dialog_layout = new QVBoxLayout(&crosshair_color_window);
+
+  QColorDialog* crosshair_color_dialog = new QColorDialog(QColor(0, 255, 0), esp_tab);
+  QPushButton* crosshair_color_button = new QPushButton();
+  crosshair_color_button->setAutoFillBackground(true);
+  crosshair_color_button->setPalette(QColor(0, 255, 0));
+  crosshair_color_button->update();
+  crosshair_color_dialog_layout->addWidget(crosshair_color_dialog);
+  crosshair_color_dialog->setWindowFlags(Qt::Widget);
+  crosshair_color_dialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+  crosshair_layout->addWidget(crosshair_color_button);
+  QObject::connect(crosshair_color_button, &QPushButton::clicked, [&]() {
+    crosshair_color_window.show();
+  });
+
+  QObject::connect(crosshair_color_dialog, &QColorDialog::currentColorChanged, [&](const QColor &color) {
+    color.getRgb(&config.visuals.crosshair_color[0], &config.visuals.crosshair_color[1], &config.visuals.crosshair_color[2]);
+    crosshair_color_button->setPalette(color);
+    crosshair_color_button->update();
+  });
+ 
+  visuals_layout->addLayout(crosshair_layout);
+  /* Crosshair end */
+
+  QCheckBox* visualize_recoil = new QCheckBox("Visualize recoil", visuals_tab);
+  visualize_recoil->setCheckState(Qt::CheckState::Checked);
+  visuals_layout->addWidget(visualize_recoil);
+  QObject::connect(visualize_recoil, &QPushButton::clicked, []() {
+    config.visuals.visualize_recoil = !config.visuals.visualize_recoil;
+  });
+
+  
+  QCheckBox* sniper_only = new QCheckBox("Sniper only", visuals_tab);
+  sniper_only->setCheckState(Qt::CheckState::Checked);
+  visuals_layout->addWidget(sniper_only);
+  QObject::connect(sniper_only, &QPushButton::clicked, []() {
+    config.visuals.sniper_only = !config.visuals.sniper_only;
+  });
+
+  
+  tabs->addTab(visuals_tab, "VISUALS");
+  /* Visuals end */
+  
+  /*Aimbot begin */
   QWidget* aim_tab = new QWidget;
   
   QVBoxLayout* aim_layout = new QVBoxLayout(aim_tab);
     
-  QCheckBox* aim_master = new QCheckBox("Master", esp_tab);
+  QCheckBox* aim_master = new QCheckBox("Master", aim_tab);
   aim_master->setCheckState(Qt::CheckState::Unchecked);
   aim_layout->addWidget(aim_master);
   QObject::connect(aim_master, &QPushButton::clicked, []() {
     config.aim.master = !config.aim.master;
   });
 
+ QCheckBox* aim_ignore_team = new QCheckBox("Ignore team", aim_tab);
+  aim_ignore_team->setCheckState(Qt::CheckState::Checked);
+  aim_layout->addWidget(aim_ignore_team);
+  QObject::connect(aim_ignore_team, &QPushButton::clicked, []() {
+    config.aim.ignore_team = !config.aim.ignore_team;
+  });
+  
+  QCheckBox* aim_spotted = new QCheckBox("Spotted", aim_tab);
+  aim_spotted->setCheckState(Qt::CheckState::Unchecked);
+  aim_layout->addWidget(aim_spotted);
+  QObject::connect(aim_spotted, &QPushButton::clicked, []() {
+    config.aim.spotted = !config.aim.spotted;
+  });
+  
+  /* Aimbot fov begin */
+  QHBoxLayout* aim_fov_layout = new QHBoxLayout();
+  QSlider* aim_fov_slider = new QSlider(Qt::Horizontal, aim_tab);
+  aim_fov_slider->setRange(1, 180);
+  aim_fov_slider->setValue(90);
+  aim_fov_slider->setTickPosition(QSlider::NoTicks);
+  aim_fov_layout->addWidget(aim_fov_slider); 
+
+  QLabel* aim_fov_label = new QLabel(aim_tab);
+  aim_fov_label->setText("FOV " + QString::number(aim_fov_slider->value()));
+  aim_fov_layout->addWidget(aim_fov_label);
+
+  QObject::connect(aim_fov_slider, &QSlider::sliderMoved, [&](int value) {
+    aim_fov_label->setText("FOV " + QString::number(aim_fov_slider->value()));
+    config.aim.fov = value;
+  });
+
+  aim_layout->addLayout(aim_fov_layout);
+  /* Aimbot fov end */
+    
+  QCheckBox* aim_show_fov = new QCheckBox("Show FOV", aim_tab);
+  aim_show_fov->setCheckState(Qt::CheckState::Unchecked);
+  aim_layout->addWidget(aim_show_fov);
+  QObject::connect(aim_show_fov, &QPushButton::clicked, []() {
+    config.aim.show_fov = !config.aim.show_fov;
+  });
+  
   QKeySequenceEdit* key = new QKeySequenceEdit;
   key->setKeySequence(QKeySequence("c"));
   aim_layout->addWidget(key);
@@ -242,27 +365,22 @@ void gui(int argc, char* argv[]) {
     config.aim.key = keySequence.toString().toStdString()[0];
   });
   
-  QCheckBox* aim_recoil = new QCheckBox("Recoil control", esp_tab);
+  QCheckBox* aim_recoil = new QCheckBox("Recoil control", aim_tab);
   aim_recoil->setCheckState(Qt::CheckState::Checked);
   aim_layout->addWidget(aim_recoil);
   QObject::connect(aim_recoil, &QPushButton::clicked, []() {
     config.aim.recoil = !config.aim.recoil;
   });  
+
+  QCheckBox* aim_auto_shoot = new QCheckBox("Automatically shoot", aim_tab);
+  aim_auto_shoot->setCheckState(Qt::CheckState::Unchecked);
+  aim_layout->addWidget(aim_auto_shoot);
+  QObject::connect(aim_auto_shoot, &QPushButton::clicked, []() {
+    config.aim.auto_shoot = !config.aim.auto_shoot;
+  }); 
   
   tabs->addTab(aim_tab, "AIMBOT");
-  
-  QWidget* misc_tab = new QWidget;
-  
-  QVBoxLayout* misc_layout = new QVBoxLayout(misc_tab);
-  
-  QCheckBox* spin = new QCheckBox("Spin", misc_tab);
-  spin->setCheckState(Qt::CheckState::Unchecked);
-  misc_layout->addWidget(spin);
-  QObject::connect(spin, &QPushButton::clicked, []() {
-    config.misc.spin = !config.misc.spin;
-  });
-  
-  tabs->addTab(misc_tab, "MISC");
+  /* Aimbot end */
   
   window.show();
   

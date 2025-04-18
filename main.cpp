@@ -18,7 +18,8 @@ int main(int argc, char *argv[]) {
     printf("Please run as root\n");
     return 1;
   }
-
+  pthread_setname_np(pthread_self(), "main_thread");
+  
   pid_t game_pid = Process::name_to_pid("cs2");
   if (!game_pid) {
     printf("Game not open\n");
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
   unsigned long mask = CWColormap | CWBorderPixel | CWBackPixel | CWEventMask | CWWinGravity|CWBitGravity | CWSaveUnder | CWDontPropagate | CWOverrideRedirect;
 
   Window window = XCreateWindow(display, root, 0, 0, 1920, 1080, 0, vinfo.depth, InputOutput, vinfo.visual, mask, &attr);
-
+  
   XShapeCombineMask(display, window, ShapeInput, 0, 0, None, ShapeSet);
     
   XShapeSelectInput(display, window, ShapeNotifyMask);
@@ -83,6 +84,8 @@ int main(int argc, char *argv[]) {
   XFixesDestroyRegion(display, region);
 
   XdbeBackBuffer back_buffer = XdbeAllocateBackBufferName(display, window, 0);
+
+  
   
   XMapWindow(display, window);
 
@@ -124,9 +127,6 @@ int main(int argc, char *argv[]) {
 						      client_address);
   if (!PlayerInfo::ptr_local_player) { printf("Couldn't find local player\n"); return 1; }
   PlayerInfo::ptr_local_player = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
-  
-
-  printf("local player: %p\n", PlayerInfo::ptr_local_player);
 
   Client::view_matrix = Memory::scan_pattern(game_pid,
 		       {0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8D, 0x0D},
@@ -157,6 +157,9 @@ int main(int argc, char *argv[]) {
 
   printf("view_angles: %p\n", Client::view_angles);
 
+  Client::force_attack = client_address + 0x39914A0;
+  
+  //start all other thread loops
   std::thread gui_thread(gui, argc, argv);
   pthread_setname_np(gui_thread.native_handle(), "gui_thread");
   
@@ -166,6 +169,7 @@ int main(int argc, char *argv[]) {
   std::thread move_thread(create_move, game_pid, move_display);
   pthread_setname_np(move_thread.native_handle(), "move_thread");
 
+  //main_thead's loop
   for (;;) {
     players(game_pid);
     usleep(1000*1000/250);
