@@ -31,7 +31,7 @@ $ make
 ### Running
 
 ```console
-sudo ./cs2-hack
+$ sudo ./cs2-hack
 ```
 
 # Features
@@ -42,6 +42,10 @@ sudo ./cs2-hack
   * Skeleton
   * Head dot
   * Snap lines
+- Visuals
+  * Crosshair
+  * Crosshair recoil
+  * Sniper crosshair
 - Aimbot
   * FOV
   * Recoil control
