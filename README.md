@@ -20,6 +20,11 @@ Arch Linux:
 $ sudo pacman -S base-devel xorg-fonts-misc qt6-base
 ```
 
+Fedora: (only tested on Fedora 42)
+``` console
+$ sudo dnf install g++ libX11-devel libXtst-devel libXcomposite-devel qt6-qtbase-devel
+```
+
 ### Compiling
 Build the program from source.  
 
