@@ -11,6 +11,7 @@
 #include "process.hpp"
 #include "memory.hpp"
 #include "client.hpp"
+#include "engine.hpp"
 #include "xutil.hpp"
 
 int main(int argc, char *argv[]) {
@@ -73,7 +74,13 @@ int main(int argc, char *argv[]) {
 
   unsigned long mask = CWColormap | CWBorderPixel | CWBackPixel | CWEventMask | CWWinGravity|CWBitGravity | CWSaveUnder | CWDontPropagate | CWOverrideRedirect;
 
-  Window window = XCreateWindow(display, root, 0, 0, 1920, 1080, 0, vinfo.depth, InputOutput, vinfo.visual, mask, &attr);
+  //this assumes the game is full srceen of some sort. Why wouldn't it be? Play the damn game correctly!
+  int tmp_window_resolution[2];
+  Xutil::display_resolution(tmp_window_resolution);
+  Engine::window_width = tmp_window_resolution[0];
+  Engine::window_height = tmp_window_resolution[1];
+  
+  Window window = XCreateWindow(display, root, 0, 0, Engine::window_width, Engine::window_height, 0, vinfo.depth, InputOutput, vinfo.visual, mask, &attr);
   
   XShapeCombineMask(display, window, ShapeInput, 0, 0, None, ShapeSet);
     
@@ -84,8 +91,6 @@ int main(int argc, char *argv[]) {
   XFixesDestroyRegion(display, region);
 
   XdbeBackBuffer back_buffer = XdbeAllocateBackBufferName(display, window, 0);
-
-  
   
   XMapWindow(display, window);
 
@@ -127,38 +132,38 @@ int main(int argc, char *argv[]) {
 						      client_address);
   if (!PlayerInfo::ptr_local_player) { printf("Couldn't find local player\n"); return 1; }
   PlayerInfo::ptr_local_player = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
-
+  
   Client::view_matrix = Memory::scan_pattern(game_pid,
-		       {0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8D, 0x0D},
-		       {
-			 true,
-			 true,
-			 true,
-			 false,
-			 false,
-			 false,
-			 false,
-			 true,
-			 true,
-			 true,
-			 false,
-			 false,
-			 false,
-			 false,
-			 true,
-			 true,
-			 true,
-		       },
-		       17, client_address);
+					     {0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8D, 0x0D},
+					     {
+					       true,
+					       true,
+					       true,
+					       false,
+					       false,
+					       false,
+					       false,
+					       true,
+					       true,
+					       true,
+					       false,
+					       false,
+					       false,
+					       false, 
+					       true,
+					       true,
+					       true,
+					     },
+					     17, client_address);
   if (!Client::view_matrix) { printf("Couldn't find view matrix\n"); return 1; }
   Client::view_matrix = Memory::relative_address(game_pid, Client::view_matrix + 0x7, 0x3, 0x7);
   
-  Client::view_angles = client_address + 0x39915E0;
-
+  Client::view_angles = client_address + 0x39905E0; //this would be better as a pattern
   printf("view_angles: %p\n", Client::view_angles);
 
-  Client::force_attack = client_address + 0x39914A0;
-  
+  Client::force_attack = client_address + 0x39904A0; //this too!
+  printf("force_attack: %p\n", Client::force_attack);
+
   //start all other thread loops
   std::thread gui_thread(gui, argc, argv);
   pthread_setname_np(gui_thread.native_handle(), "gui_thread");

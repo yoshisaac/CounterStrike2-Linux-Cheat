@@ -13,10 +13,14 @@ struct Esp {
   
   bool name = true;
 
+  bool weapon_name = false;
+  
   bool skeleton = false;
   int skeleton_color[3] = {255, 255, 255};
 
   bool head_dot = false;
+  bool head_dot_fill = true;
+  bool cat_ears = false;
   int head_dot_color[3] = {255, 255, 255};
   
   bool snap_lines = false;
@@ -29,6 +33,8 @@ struct Visuals {
 
   bool visualize_recoil = true;
   bool sniper_only = true;
+
+  bool fps = false;
 };
 
 struct Aim {
@@ -40,6 +46,9 @@ struct Aim {
   float fov = 90;
   bool show_fov = false;
 
+  bool snap_lines = true;
+  int snap_lines_color[3] = {255, 255, 0};
+  
   char key = 'c';
 
   bool recoil = true;

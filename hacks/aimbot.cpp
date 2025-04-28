@@ -8,13 +8,6 @@
 #include "../client.hpp"
 #include "../math.hpp"
 
-float DistanceScale(const float distance) {
-    if (distance > 500.0f) {
-        return 1.0f;
-    }
-    return 5.0f - distance / 125.0f;
-}
-
 void aimbot(pid_t game_pid, Display* aim_display) {
   for (unsigned long i = 0; i < 64; ++i) {
     if (!config.aim.master) break;
@@ -31,66 +24,75 @@ void aimbot(pid_t game_pid, Display* aim_display) {
     float _out[2];
     if (!world_to_screen(game_pid, player.bone_matrix[6], _out)) continue;
     
-    if (PlayerInfo::get_player(Aimbot::index).health <= 0) {
+    if (PlayerInfo::get_player(Aimbot::index).health <= 0 ||
+	(config.aim.spotted == true && PlayerInfo::get_player(Aimbot::index).spotted == false)) {
       Aimbot::index = -1;
+      PlayerInfo::l_players[Aimbot::index].fov_distance = 999999;
     }
       
-    float plocal_angles[3];
+    Euler plocal_angles;
     Memory::read(game_pid, Client::view_angles, &plocal_angles, sizeof(float[3]));
-    float plocal_angles_final[3] = {*plocal_angles};
+    Euler plocal_angles_final = plocal_angles;
 
-    float delta_location[3] = { float(plocal.location[0] - player.bone_matrix[6][0]),
-				float(plocal.location[1] - player.bone_matrix[6][1]),
-				float(plocal.location[2] + plocal.height - player.bone_matrix[6][2])};
+    Vector3 delta_location = { float(plocal.location.x - player.bone_matrix[6].x),
+			       float(plocal.location.y - player.bone_matrix[6].y),
+			       float(plocal.location.z + plocal.height - player.bone_matrix[6].z)};
 
-    float hyp = sqrt(delta_location[0] * delta_location[0] + delta_location[1] * delta_location[1]);
+    float hyp = sqrt(delta_location.x * delta_location.x + delta_location.y * delta_location.y);
 
-    plocal_angles_final[0] = atan(delta_location[2] / hyp) * radpi;
-    plocal_angles_final[1] = atan(delta_location[1] / delta_location[0]) * radpi;
+    plocal_angles_final.pitch = atan(delta_location.z / hyp) * radpi;
+    plocal_angles_final.yaw = atan(delta_location.y / delta_location.x) * radpi;
 
     float distance = distance_3d(plocal.location, player.bone_matrix[6]);
 
-    float fov = sqrt(powf(sin((plocal_angles[0] - plocal_angles_final[0] + plocal.aim_punch[0] * 2) * pideg) * 180, 2.0) + powf(sin((plocal_angles[1] - plocal_angles_final[1] + plocal.aim_punch[1] * 2) * pideg) * 180, 2.0));
+    float fov = sqrt(powf(sin((plocal_angles.pitch - plocal_angles_final.pitch + plocal.aim_punch.pitch * 2) * pideg) * 180, 2.0) +
+		     powf(sin((plocal_angles.yaw   - plocal_angles_final.yaw   + plocal.aim_punch.yaw   * 2) * pideg) * 180, 2.0));
     
     if (Aimbot::index == i) {
 	
       PlayerInfo::l_players[Aimbot::index].fov_distance = fov;
 	
-      if (delta_location[0] >= 0.0f) {
-	plocal_angles_final[1] += 180.0f;
+      if (delta_location.x >= 0.0f) {
+	plocal_angles_final.yaw += 180.0f;
       }
 
       if (fov > config.aim.fov && !Xutil::key_down(aim_display, config.aim.key)) {
+	PlayerInfo::l_players[Aimbot::index].fov_distance = 999999;
 	Aimbot::index = -1;
 	continue;
       }
 	
-      while (plocal_angles_final[0] > 89)
-	plocal_angles_final[0] -= 180;
+      while (plocal_angles_final.pitch > 89)
+	plocal_angles_final.pitch -= 180;
 
-      while (plocal_angles_final[0] < -89)
-	plocal_angles_final[0] += 180;
+      while (plocal_angles_final.pitch < -89)
+	plocal_angles_final.pitch += 180;
 
-      if (isNaN(plocal_angles_final[0]))
-	plocal_angles_final[0] = 0;
+      if (isNaN(plocal_angles_final.pitch))
+	plocal_angles_final.pitch = 0;
 
-      if (isNaN(plocal_angles_final[1]))
-	plocal_angles_final[1] = 0;
+      if (isNaN(plocal_angles_final.yaw))
+	plocal_angles_final.yaw = 0;
 	
       if (config.aim.recoil) {
-	plocal_angles_final[0] -= (plocal.aim_punch[0] * 2);
-	plocal_angles_final[1] -= (plocal.aim_punch[1] * 2);
+	plocal_angles_final.pitch -= (plocal.aim_punch.pitch * 2);
+	plocal_angles_final.yaw -= (plocal.aim_punch.yaw * 2);
       } 
 
     }
 
     if (Aimbot::index == i && Xutil::key_down(aim_display, config.aim.key)) {
-      Memory::write(game_pid, Client::view_angles, &*plocal_angles_final, sizeof(float[2]));
+      Memory::write(game_pid, Client::view_angles, &plocal_angles_final, sizeof(float[2]));
+
+      char a = 0b0;	
+      Memory::read(game_pid, Client::force_attack, &a, sizeof(char));
 
       if (config.aim.auto_shoot) {
-	int a = 1;
-	Memory::write(game_pid, Client::force_attack, &a, sizeof(int));
+	a = a | (1<<0);
       }
+
+      Memory::write(game_pid, Client::force_attack, &a, sizeof(char));
+
     } else {
       if (fov <= config.aim.fov && fov < PlayerInfo::get_player(Aimbot::index).fov_distance) {
 	Aimbot::index = i;

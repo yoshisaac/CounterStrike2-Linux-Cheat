@@ -13,6 +13,7 @@
 
 #include <climits>
 #include <stdio.h>
+#include <string>
 
 namespace Xutil {
 
@@ -82,6 +83,30 @@ namespace Xutil {
     return (keys[keyCode / 8] & (1 << (keyCode % 8))) != 0;
   }
 
+  inline void display_resolution(int resolution[2]) {
+    FILE* fp = popen("xrandr | grep primary -A 1 | grep \'\\*\' | awk {\'print $1\'}", "r");
+    char buffer[1024];
+    int x, y;
+
+    if (fp == NULL) {
+      resolution = 0;
+      return;
+    }
+
+    if (fgets(buffer, sizeof(buffer), fp) != NULL) {
+      std::string num_buffer = "";
+      for (unsigned int i = 0; i < strlen(buffer); ++i) {
+	if (buffer[i] == 'x') { x = atoi(num_buffer.c_str()); num_buffer = ""; continue; }
+	num_buffer += buffer[i];
+      }
+      y = atoi(num_buffer.c_str());
+    }
+    
+    pclose(fp);
+
+    resolution[0] = x;
+    resolution[1] = y;
+  }
 }
 
 #endif

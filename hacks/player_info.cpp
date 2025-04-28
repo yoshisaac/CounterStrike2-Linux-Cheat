@@ -24,10 +24,13 @@ void players(pid_t game_pid) {
     uintptr_t name_address;
     Memory::read(game_pid, controller + 0x8F8, &name_address, sizeof(uintptr_t));
 
+    int fov_desired;
+    Memory::read(game_pid, controller + 0x87C, &fov_desired, sizeof(int));
+    
     std::string name;
     for (int h = 0; h < 256; ++h) {
       char c;
-      Memory::read(game_pid, name_address + h, &c, sizeof(char));\
+      Memory::read(game_pid, name_address + h, &c, sizeof(char));
 
       if (c == '\0') break;
 
@@ -62,6 +65,19 @@ void players(pid_t game_pid) {
       PlayerInfo::l_players[i-1] = PlayerInfo::Player();
       continue;
     }
+
+    uintptr_t camera_service;
+    Memory::read(game_pid, player + 0x1188, &camera_service, sizeof(uintptr_t));
+    if (!camera_service) {
+      PlayerInfo::l_players[i-1] = PlayerInfo::Player();
+      continue;
+    }    
+    
+    int fov;
+    Memory::read(game_pid, camera_service + 0x210, &fov, sizeof(int));
+    
+
+    
     
     uintptr_t local_player_controller;
     Memory::read(game_pid, PlayerInfo::ptr_local_player, &local_player_controller, sizeof(uintptr_t));
@@ -82,9 +98,6 @@ void players(pid_t game_pid) {
 
     float fov_multiplier;
     Memory::read(game_pid, player + 0x12C4, &fov_multiplier, sizeof(float));
-
-    float fov_desired;
-    Memory::read(game_pid, player + 0x87C, &fov_desired, sizeof(float));
     
     uintptr_t bone_matrix_ptr;
     float bone_matrix[80][3];
@@ -116,6 +129,7 @@ void players(pid_t game_pid) {
     unsigned char flags2;
     Memory::read(game_pid, player + 0x564, &flags2, sizeof(unsigned char));
     bool crouched = flags2 & (1<<1);
+    bool on_ground = flags2 & (1<<0);
 
     float height;
     Memory::read(game_pid, player + 0xC40, &height, sizeof(float));
@@ -145,8 +159,8 @@ void players(pid_t game_pid) {
     }
         
     
-    PlayerInfo::l_players[i-1] = PlayerInfo::Player(i-1, health, team,
-						    crouched, spotted,
+    PlayerInfo::l_players[i-1] = PlayerInfo::Player(i-1, health, team, fov,
+						    crouched, on_ground, spotted,
 						    fov_multiplier, fov_desired,
 						    height,
 						    aim_punch, location, bone_matrix,

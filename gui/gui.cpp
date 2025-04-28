@@ -126,6 +126,13 @@ void gui(int argc, char* argv[]) {
     config.esp.name = !config.esp.name;
   });  
 
+  QCheckBox* esp_weapon_name = new QCheckBox("Weapon name", esp_tab);
+  esp_weapon_name->setCheckState(Qt::CheckState::Unchecked);
+  esp_layout->addWidget(esp_weapon_name);
+  QObject::connect(esp_weapon_name, &QPushButton::clicked, []() {
+    config.esp.weapon_name = !config.esp.weapon_name;
+  });  
+  
   /* Skeleton begin */
   QHBoxLayout* skeleton_layout = new QHBoxLayout();
   QCheckBox* esp_skeleton = new QCheckBox("Skeleton", esp_tab);
@@ -173,6 +180,20 @@ void gui(int argc, char* argv[]) {
     config.esp.head_dot = !config.esp.head_dot;
   });
 
+  QCheckBox* esp_head_dot_fill = new QCheckBox("Filled", esp_tab);
+  esp_head_dot_fill->setCheckState(Qt::CheckState::Checked);
+  head_dot_layout->addWidget(esp_head_dot_fill);
+  QObject::connect(esp_head_dot_fill, &QPushButton::clicked, []() {
+    config.esp.head_dot_fill = !config.esp.head_dot_fill;
+  });
+
+  QCheckBox* esp_head_cat_ears = new QCheckBox("Ears", esp_tab);
+  esp_head_cat_ears->setCheckState(Qt::CheckState::Unchecked);
+  head_dot_layout->addWidget(esp_head_cat_ears);
+  QObject::connect(esp_head_cat_ears, &QPushButton::clicked, []() {
+    config.esp.cat_ears = !config.esp.cat_ears;
+  });  
+  
   QWidget head_dot_color_window;
   head_dot_color_window.setWindowTitle("Select Head_Dot Color");
   head_dot_color_window.setGeometry(100, 100, 520, 450);
@@ -301,6 +322,12 @@ void gui(int argc, char* argv[]) {
     config.visuals.sniper_only = !config.visuals.sniper_only;
   });
 
+  QCheckBox* fps = new QCheckBox("Fps", visuals_tab);
+  fps->setCheckState(Qt::CheckState::Unchecked);
+  visuals_layout->addWidget(fps);
+  QObject::connect(fps, &QPushButton::clicked, []() {
+    config.visuals.fps = !config.visuals.fps;
+  });
   
   tabs->addTab(visuals_tab, "VISUALS");
   /* Visuals end */
@@ -343,7 +370,7 @@ void gui(int argc, char* argv[]) {
   aim_fov_label->setText("FOV " + QString::number(aim_fov_slider->value()));
   aim_fov_layout->addWidget(aim_fov_label);
 
-  QObject::connect(aim_fov_slider, &QSlider::sliderMoved, [&](int value) {
+  QObject::connect(aim_fov_slider, &QSlider::valueChanged, [&](int value) {
     aim_fov_label->setText("FOV " + QString::number(aim_fov_slider->value()));
     config.aim.fov = value;
   });
@@ -357,6 +384,44 @@ void gui(int argc, char* argv[]) {
   QObject::connect(aim_show_fov, &QPushButton::clicked, []() {
     config.aim.show_fov = !config.aim.show_fov;
   });
+
+  /* Aimbot snap lines begin */
+  QHBoxLayout* aim_snap_lines_layout = new QHBoxLayout();
+  QCheckBox* aim_snap_lines = new QCheckBox("Aimbot snap lines", aim_tab);
+  aim_snap_lines->setCheckState(Qt::CheckState::Checked);
+  aim_snap_lines_layout->addWidget(aim_snap_lines);
+  QObject::connect(aim_snap_lines, &QPushButton::clicked, []() {
+    config.aim.snap_lines = !config.aim.snap_lines;
+  });  
+
+  QWidget aim_snap_lines_color_window;
+  aim_snap_lines_color_window.setWindowTitle("Select Snap Lines Color");
+  aim_snap_lines_color_window.setGeometry(100, 100, 520, 450);
+  aim_snap_lines_color_window.setFixedSize(520, 450);
+  
+  QVBoxLayout* aim_snap_lines_color_dialog_layout = new QVBoxLayout(&aim_snap_lines_color_window);
+
+  QColorDialog* aim_snap_lines_color_dialog = new QColorDialog(QColor(255, 255, 0), esp_tab);
+  QPushButton* aim_snap_lines_color_button = new QPushButton();
+  aim_snap_lines_color_button->setAutoFillBackground(true);
+  aim_snap_lines_color_button->setPalette(QColor(255, 255, 0));
+  aim_snap_lines_color_button->update();
+  aim_snap_lines_color_dialog_layout->addWidget(aim_snap_lines_color_dialog);
+  aim_snap_lines_color_dialog->setWindowFlags(Qt::Widget);
+  aim_snap_lines_color_dialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+  aim_snap_lines_layout->addWidget(aim_snap_lines_color_button);
+  QObject::connect(aim_snap_lines_color_button, &QPushButton::clicked, [&]() {
+    aim_snap_lines_color_window.show();
+  });
+
+  QObject::connect(aim_snap_lines_color_dialog, &QColorDialog::currentColorChanged, [&](const QColor &color) {
+    color.getRgb(&config.aim.snap_lines_color[0], &config.aim.snap_lines_color[1], &config.aim.snap_lines_color[2]);
+    aim_snap_lines_color_button->setPalette(color);
+    aim_snap_lines_color_button->update();
+  });
+ 
+  aim_layout->addLayout(aim_snap_lines_layout);  
+  /* Aimbot snap lines end */
   
   QKeySequenceEdit* key = new QKeySequenceEdit;
   key->setKeySequence(QKeySequence("c"));

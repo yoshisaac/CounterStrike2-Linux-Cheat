@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <string>
 
+#include "../vector.hpp"
+
 void players(pid_t game_pid);
 
 namespace PlayerInfo {
@@ -9,20 +11,24 @@ namespace PlayerInfo {
 
   class Player {
   public:
+    // player structure
     int index;
     int health;
     int team;
+    int fov;
     bool crouched;
+    bool on_ground;
     bool spotted;
     float fov_multiplier;
-    float fov_desired;
+    int fov_desired;
     float height;
-    float aim_punch[2];
-    float location[3];
-    float bone_matrix[80][3];
+    Euler aim_punch;
+    Vector3 location;
+    Vector3 bone_matrix[80];
     std::string name;
     std::string weapon_name;
-    
+
+    // aimbot related
     float fov_distance;
     
     Player() {
@@ -32,41 +38,39 @@ namespace PlayerInfo {
       crouched = false;
       spotted = false;
       fov_distance = 999999;
-      location[0] = 0;
-      location[1] = 0;
-      location[2] = 0;
+      location = {0, 0, 0};
       name = "< invalid >";
       weapon_name = "< invalid >";
     }
 
-    Player(int index, int health, int team,
-	   bool crouched, bool spotted, float fov_multiplier, float fov_desired,
-	   float height,
+    Player(int index, int health, int team, int fov,
+	   bool crouched, bool on_ground, bool spotted,
+	   float fov_multiplier, int fov_desired, float height,
 	   float aim_punch[2], float location[3], float bone_matrix[80][3],
 	   float fov_distance, std::string name, std::string weapon_name) {
       this->index = index;
       this->health = health;
       this->team = team;
+      this->fov = fov;
       this->crouched = crouched;
+      this->on_ground = on_ground;
       this->spotted = spotted;
       this->fov_multiplier = fov_multiplier;
       this->fov_desired = fov_desired;
       this->height = height;
-      this->aim_punch[0] = aim_punch[0];
-      this->aim_punch[1] = aim_punch[1];
+      this->aim_punch.pitch = aim_punch[0];
+      this->aim_punch.yaw = aim_punch[1];
       
-      this->location[0] = location[0]; 
-      this->location[1] = location[1];
-      this->location[2] = location[2];
+      this->location = location;
 
       this->name = name;
 
       this->weapon_name = weapon_name;
       
       for (int i = 0; i < 80; ++i) {
-	this->bone_matrix[i][0] = bone_matrix[i][0];
-	this->bone_matrix[i][1] = bone_matrix[i][1];
-	this->bone_matrix[i][2] = bone_matrix[i][2];	
+	this->bone_matrix[i].x = bone_matrix[i][0];
+	this->bone_matrix[i].y = bone_matrix[i][1];
+	this->bone_matrix[i].z = bone_matrix[i][2];	
       }
 
       this->fov_distance = fov_distance;
