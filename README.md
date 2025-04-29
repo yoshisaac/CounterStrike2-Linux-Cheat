@@ -46,6 +46,7 @@ $ sudo ./cs2-hack
   * Name
   * Skeleton
   * Head dot
+  * Ears
   * Snap lines
 - Visuals
   * Crosshair
@@ -56,7 +57,7 @@ $ sudo ./cs2-hack
   * Recoil control
   * Auto shoot
   
-![Screenshot of esp full](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/pwzzz2389xumgihzdq.png)
-![Screenshot of esp idea](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/v34j7li6ubtksm38v1.png)
-![Screenshot of menu esp](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/qqa9fgam1sghti7n1t.png)
-![Screenshot of menu aimbot](https://r2.e-z.host/bb3dfc85-7f7f-4dcb-8b0b-3a4af0aa57e4/cpsd77sm6jthwqwg2n.png)
+![Screenshot of esp full](https://i.imgur.com/y9Nq2Tg.png)
+![Screenshot of esp ideal](https://i.imgur.com/lBKVnd6.png)
+![Screenshot of menu esp](https://i.imgur.com/NtTMRDW.png)
+![Screenshot of menu aimbot](https://i.imgur.com/FYB7jJf.png)
