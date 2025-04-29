@@ -74,11 +74,8 @@ void crosshair(pid_t game_pid, XdbeBackBuffer back_buffer, Display* draw_display
 							    config.aim.snap_lines_color[1],
 							    config.aim.snap_lines_color[2],
 							    draw_display));
-
-    if (PlayerInfo::get_player(Aimbot::index).index != -1) {
-      float out[2];
-      world_to_screen(game_pid, PlayerInfo::get_player(Aimbot::index).bone_matrix[6], out);
-
+    float out[2];
+    if (Aimbot::index != -1 && world_to_screen(game_pid, PlayerInfo::get_player(Aimbot::index).bone_matrix[6], out)) {
       XDrawLine(draw_display, back_buffer, gc, screen_center[0], screen_center[1], out[0], out[1]);
     }
   }

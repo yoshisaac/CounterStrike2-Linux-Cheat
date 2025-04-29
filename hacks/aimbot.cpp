@@ -14,22 +14,23 @@ void aimbot(pid_t game_pid, Display* aim_display) {
       
     PlayerInfo::Player player = PlayerInfo::get_player(i);
     PlayerInfo::Player plocal = PlayerInfo::get_local_player();
-
       
     if (player.index == plocal.index) continue;
     if (config.esp.ignore_team == true && player.team == plocal.team) continue;
     if (player.health <= 0) continue;
-    if (config.aim.spotted == true && player.spotted == false) continue;
     
     float _out[2];
     if (!world_to_screen(game_pid, player.bone_matrix[6], _out)) continue;
     
-    if (PlayerInfo::get_player(Aimbot::index).health <= 0 ||
+    if (Aimbot::index != -1 && PlayerInfo::get_player(Aimbot::index).health <= 0 ||
 	(config.aim.spotted == true && PlayerInfo::get_player(Aimbot::index).spotted == false)) {
       Aimbot::index = -1;
       PlayerInfo::l_players[Aimbot::index].fov_distance = 999999;
     }
-      
+
+    if (config.aim.spotted == true && player.spotted == false) continue;
+
+    
     Euler plocal_angles;
     Memory::read(game_pid, Client::view_angles, &plocal_angles, sizeof(float[3]));
     Euler plocal_angles_final = plocal_angles;
@@ -90,7 +91,7 @@ void aimbot(pid_t game_pid, Display* aim_display) {
       if (config.aim.auto_shoot) {
 	a = a | (1<<0);
       }
-
+      
       Memory::write(game_pid, Client::force_attack, &a, sizeof(char));
 
     } else {

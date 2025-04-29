@@ -22,6 +22,7 @@ namespace PlayerInfo {
     float fov_multiplier;
     int fov_desired;
     float height;
+    Euler view_angles;
     Euler aim_punch;
     Vector3 location;
     Vector3 bone_matrix[80];
@@ -45,7 +46,7 @@ namespace PlayerInfo {
 
     Player(int index, int health, int team, int fov,
 	   bool crouched, bool on_ground, bool spotted,
-	   float fov_multiplier, int fov_desired, float height,
+	   float fov_multiplier, int fov_desired, float height, float view_angles[2],
 	   float aim_punch[2], float location[3], float bone_matrix[80][3],
 	   float fov_distance, std::string name, std::string weapon_name) {
       this->index = index;
@@ -58,8 +59,12 @@ namespace PlayerInfo {
       this->fov_multiplier = fov_multiplier;
       this->fov_desired = fov_desired;
       this->height = height;
+      
       this->aim_punch.pitch = aim_punch[0];
       this->aim_punch.yaw = aim_punch[1];
+
+      this->view_angles.pitch = view_angles[0];
+      this->view_angles.yaw = view_angles[1];
       
       this->location = location;
 
@@ -85,6 +90,7 @@ namespace PlayerInfo {
   }
 
   inline int i_local_player;
+  inline uintptr_t local_player_controller_address;
   inline uintptr_t ptr_local_player;
   
   static Player get_local_player(void) {

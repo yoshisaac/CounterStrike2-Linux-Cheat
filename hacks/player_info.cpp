@@ -77,10 +77,10 @@ void players(pid_t game_pid) {
     Memory::read(game_pid, camera_service + 0x210, &fov, sizeof(int));
     
 
-    
+    PlayerInfo::local_player_controller_address = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
     
     uintptr_t local_player_controller;
-    Memory::read(game_pid, PlayerInfo::ptr_local_player, &local_player_controller, sizeof(uintptr_t));
+    Memory::read(game_pid, PlayerInfo::local_player_controller_address, &local_player_controller, sizeof(uintptr_t));
 
     uintptr_t local_player_pawn;
     Memory::read(game_pid, local_player_controller + 0x7B4, &local_player_pawn, sizeof(uintptr_t));
@@ -119,6 +119,9 @@ void players(pid_t game_pid) {
       aim_punch[0] = 0;
       aim_punch[1] = 0;
     }
+
+    float view_angles[2];
+    Memory::read(game_pid, player + 0x11F4, &view_angles, sizeof(float[2]));
     
     unsigned char team;
     Memory::read(game_pid, player + 0x55B, &team, sizeof(unsigned char));
@@ -163,7 +166,8 @@ void players(pid_t game_pid) {
 						    crouched, on_ground, spotted,
 						    fov_multiplier, fov_desired,
 						    height,
-						    aim_punch, location, bone_matrix,
+						    view_angles, aim_punch,
+						    location, bone_matrix,
 						    PlayerInfo::l_players[i-1].fov_distance,
 						    name, weapon_name);
   }

@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 						      {true, true, true, false, false, false, false, true, true, true, true, true}, 12,
 						      client_address);
   if (!PlayerInfo::ptr_local_player) { printf("Couldn't find local player\n"); return 1; }
-  PlayerInfo::ptr_local_player = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
+  PlayerInfo::local_player_controller_address = Memory::relative_address(game_pid, PlayerInfo::ptr_local_player, 0x3, 0x8);
   
   Client::view_matrix = Memory::scan_pattern(game_pid,
 					     {0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8D, 0x0D},
