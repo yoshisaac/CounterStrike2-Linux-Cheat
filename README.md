@@ -61,3 +61,14 @@ $ sudo ./cs2-hack
 ![Screenshot of esp ideal](https://i.imgur.com/lBKVnd6.png)
 ![Screenshot of menu esp](https://i.imgur.com/NtTMRDW.png)
 ![Screenshot of menu aimbot](https://i.imgur.com/FYB7jJf.png)
+
+# Compatibility
+This hack strictly uses X11 as of right now. To make the ESP overlay window be as convient to use as possible, in the least hacky manor, I've used lower level X11 attributes, etc.  
+If you use a Wayland session for your Desktop Environment, then XWayland and the Desktop's compositor should handle everything just fine.  
+  
+If you are using something like Hyperland, then the composition done has no good XWayland support for features like double buffering. Therefor, the hack does not run correctly.  
+  
+Using [glfw](https://github.com/glfw/glfw) would fix this, but making an overlay which has complete feature parody would be much harder. Something to be done in the future.  
+
+# TODO
+- native Wayland
